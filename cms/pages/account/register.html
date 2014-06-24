@@ -1,0 +1,119 @@
+[% title = "Register" %]
+
+<h1>New User Registration</h1>
+
+<form name="register" action="/account/register/continue" method="POST" onSubmit="return Siikir.Account.onRegister()">
+
+<fieldset style="width: 60%">
+	<legend>Account Information</legend>
+
+	This entire section is required to register.<p>
+
+	<table width="100%" border="0" cellspacing="2" cellpadding="2">
+		<tr>
+			<td width="100%" colspan="2" align="left" valign="top">
+				<strong class="bigger">User name:</strong><br>
+				Must be unique. Only letters, numbers, or:&nbsp;&nbsp;<strong>. - _</strong><br>
+				<input type="text" size="25" id="username" name="username" class="fullWidth" value="[% param.username %]">
+			</td>
+		</tr>
+		<tr>
+			<td width="50%" align="left" valign="top">
+				<strong class="bigger">Password:</strong><br>
+				<input type="password" size="25" id="password" name="password">
+			</td>
+			<td width="50%" align="left" valign="top">
+				<strong class="bigger">Confirm:</strong><br>
+				<input type="password" size="25" id="confirm" name="confirm" class="fullWidth">
+			</td>
+		</tr>
+		<tr>
+			<td width="100%" colspan="2" align="left" valign="top">
+				<strong class="bigger">Date of Birth:</strong><br>
+				You must be at least 18 years of age to use this site.<br>
+				<select name="month" id="month">
+				[% SET i = 0 %]
+				[% FOREACH month = constants.months %]
+					[% i = i + 1 %]
+					<option value="[% i %]"[% " selected" IF i == param.month %]>[% month %]</option>
+				[% END %]
+				</select>
+
+				<select name="day" id="day">
+				[% FOREACH day = constants.mdays %]
+					<option value="[% day %]"[% " selected" IF i == param.day %]>[% day %]</option>
+				[% END %]
+				</select>
+
+				<select name="year" id="year">
+				[% FOREACH year = constants.years %]
+					<option value="[% year %]"[% " selected" IF i == param.year %]>[% year %]</option>
+				[% END %]
+				</select>
+			</td>
+		</tr>
+	</table>
+</fieldset><p>
+
+<fieldset style="width: 60%">
+	<legend>Profile Information</legend>
+
+	These fields are optional and can be filled in later.<p>
+
+	<table width="100%" border="0" cellspacing="2" cellpadding="2">
+		<tr>
+			<td width="50%" align="left" valign="top">
+				<strong class="bigger">Your name or nickname:</strong><br>
+				This will be shown on your profile.<br>
+				<input type="text" size="25" name="name" value="[% param.name %]">
+			</td>
+			<td width="50%" align="left" valign="top">
+				<strong class="bigger">Your Email Address:</strong><br>
+				For message notifications, etc.*<br>
+				<input type="text" size="25" name="email" class="fullWidth" value="[% param.email %]">
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2" align="left" valign="top">
+				<strong class="bigger">Gender:</strong><br>
+				<label><input type="radio" name="gender" value="male"[% " checked" IF param.gender == "male" %]> Male</label>
+				<label><input type="radio" name="gender" value="female"[% " checked" IF param.gender == "female" %]> Female</label>
+				<label><input type="radio" name="gender" value=""[% " checked" IF param.gender == "" %]> Prefer not to say</label><p>
+
+				* We will <strong>never</strong> give out your e-mail address to anyone
+				else, so you needn't worry about getting junk mail. Your e-mail is only
+				used to receive notifications about new messages, who thinks you're hot,
+				or to recover a lost password. It is optional, so you don't need to
+				provide it; but without it, it may be difficult to reset a forgotten
+				password.
+			</td>
+		</tr>
+	</table>
+</fieldset><p>
+
+<fieldset style="width: 60%">
+	<legend>Location &amp; Time Zone</legend>
+
+	<strong class="bigger">Zip Code (US Only):</strong><br>
+	To get a rough idea where in the world you're located.<br>
+	<input type="number" size="25" name="zipcode" id="zipcode"><p>
+
+	<strong class="bigger">Time Zone:</strong><br>
+	To help the site display dates and times in your local time zone, please
+	tell us what time zone you're currently in.<br>
+	[% INCLUDE "time-zone-select.html" %]
+</fieldset><p>
+
+By clicking on "Continue" you agree to the terms of the
+<a href="/help/coc">Code of Conduct</a>.<p>
+<input type="submit" value="Continue >>">
+
+<div style="display: none">
+If you can see these fields, don't touch them.<p>
+
+<input type="text" name="website" value="http://"><br>
+<input type="text" name="nick" value=""><br>
+<textarea cols="40" rows="8" name="comment"></textarea>
+</div>
+
+</form>

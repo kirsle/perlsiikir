@@ -1,0 +1,13 @@
+[% title = "Welcome to Siikir!" %]
+
+[%# Must be logged in %]
+[% IF login != 1 %]
+	[% INCLUDE "account/register.html" %]
+[% ELSE %]
+	<h1>Welcome to Siikir!</h1>
+
+	Welcome, <strong>[% account.profile.displayname %]!</strong> Now that you've created your
+	account, it's time to upload a profile picture!
+
+	[% INCLUDE "photos/upload.html" %]
+[% END %]

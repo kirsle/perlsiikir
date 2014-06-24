@@ -1,0 +1,327 @@
+[% title = "View Profile" %]
+
+[% IF profile %]
+[% title = profile.displayname %]
+<table border="0" cellspacing="4" cellpadding="2" width="100%">
+	<tr>
+		<td align="center" valign="top" width="200">
+			<a href="/photos/view/album/[% link %]">
+			[% IF photo.flagged && !photo.approved %]
+				<img src="/static/images/pending-tiny.png" alt="Profile Photo" class="portrait">
+			[% ELSIF photo.small %]
+				<img src="[% photopub %]/[% photo.tiny %]" alt="Profile Photo" class="portrait">
+			[% ELSE %]
+				<img src="/static/images/shy-tiny.png" alt="Profile Photo" class="portrait">
+			[% END %]
+			</a>
+		</td>
+		<td align="left" valign="top">
+			<div style="padding-left: 40px">
+				<h1>[% profile.displayname %]'s Profile</h1>
+
+				[% IF profile.admin %]
+					<img src="/static/icons/admin.png" width="16" height="16" alt="Admin user" title="Admin user">
+				[% END %]
+				[% profile.age %]
+				[% IF profile.gender %]
+					/ [% profile.gender %]
+				[% END %]
+				[% IF profile.location %]
+					/ [% profile.location %]
+				[% END %]
+					[% IF profile.dating %]
+					/ [% profile.dating %]
+				[% END %]
+				<p>
+
+				[%# Looking at our own profile %]
+				[% mirror = 0 %]
+				[% IF login && uid == profile.userid %]
+					[%# Mirror, mirror on the wall %]
+					[% mirror = 1 %]
+				[% END %]
+				[% IF login %]
+				<table border="0" cellspacing="0" cellpadding="2">
+					<tr>
+						<td align="left" valign="top" style="padding-right: 48px">
+							&#0164; [% IF !mirror %]<a href="/mail/compose?to=[% link %]">[% END %]Send Message[% IF !mirror %]</a>[% END %]<p>
+							[% IF profile.admin %]
+							&#0164; Admins can't be blocked
+							[% ELSE %]
+							&#0164; [% IF !mirror %]<a href="/account/settings/block?who=[% link %]">[% END %]Block this user[% IF !mirror %]</a>[% END %]
+							[% END %]
+							[% IF isAdmin %]<p>
+								&#0164; <a href="/admin/users/become?id=[% profile.userid %]">Log in as this user</a>
+							[% END %]
+						</td>
+						<td align="left" valign="top">
+							&#0164; <a href="/photos/view/album/[% link %]">View Photos</a>
+						</td>
+					</tr>
+				</table>
+				[% END %]
+			</div>
+		</td>
+	</tr>
+</table><p>
+
+<table width="100%" border="0" cellspacing="2" cellpadding="2">
+	<tr>
+		<td width="33%" align="left" valign="top">
+			<h3 style="margin-top: 0px">The Basics</h3>
+
+			[% default = "<em>Not specified</em>" %]
+			<table width="100%" border="0" cellspacing="0" cellpadding="4">
+				[% IF profile.location %]
+				<tr>
+					<td width="15" align="left" valign="middle">
+						<strong>Location:</strong>
+					</td>
+					<td align="left" valign="middle">
+						[% profile.location || default %]
+					</td>
+				</tr>
+				[% END %]
+				[% IF profile.hometown %]
+				<tr>
+					<td align="left" valign="middle">
+						<strong>Hometown:</strong>
+					</td>
+					<td align="left" valign="middle">
+						[% profile.hometown || default %]
+					</td>
+				</tr>
+				[% END %]
+				[% IF profile.profession %]
+				<tr>
+					<td align="left" valign="middle">
+						<strong>Profession:</strong>
+					</td>
+					<td align="left" valign="middle">
+						[% profile.profession || default %]
+					</td>
+				</tr>
+				[% END %]
+				[% IF profile.hobbies %]
+				<tr>
+					<td align="left" valign="middle">
+						<strong>Hobbies:</strong>
+					</td>
+					<td align="left" valign="middle">
+						[% profile.hobbies || default %]
+					</td>
+				</tr>
+				[% END %]
+				[% IF profile.race %]
+				<tr>
+					<td align="left" valign="middle">
+						<strong>Ethnicity:</strong>
+					</td>
+					<td align="left" valign="middle">
+						[% profile.race || default %]
+					</td>
+				</tr>
+				[% END %]
+				[% feet = "height-feet" %]
+				[% inches = "height-inches" %]
+				[% IF profile.$feet || profile.$inches %]
+				<tr>
+					<td align="left" valign="middle">
+						<strong>Height:</strong>
+					</td>
+					<td align="left" valign="middle">
+						[% profile.$feet || default %]'
+						[% IF profile.$inches %]
+							[% profile.$inches %]"
+						[% END %]
+					</td>
+				</tr>
+				[% END %]
+				[% IF profile.weight %]
+				<tr>
+					<td align="left" valign="middle">
+						<strong>Weight:</strong>
+					</td>
+					<td align="left" valign="middle">
+						[% profile.weight || default %][% " lbs" IF profile.weight %]
+					</td>
+				</tr>
+				[% END %]
+				[% IF profile.bodytype %]
+				<tr>
+					<td align="left" valign="middle">
+						<strong>Body Type:</strong>
+					</td>
+					<td align="left" valign="middle">
+						[% profile.bodytype || default %]
+					</td>
+				</tr>
+				[% END %]
+				[% IF profile.bodyhair %]
+				<tr>
+					<td align="left" valign="middle">
+						<strong>Body Hair:</strong>
+					</td>
+					<td align="left" valign="middle">
+						[% profile.bodyhair || default %]
+					</td>
+				</tr>
+				[% END %]
+				[% IF profile.smoke || profile.drink %]
+				<tr>
+					<td align="left" valign="middle">
+						<strong>Smoke/Drink:</strong>
+					</td>
+					<td align="left" valign="middle">
+						[% profile.smoke || "<em>Unknown</em>" %]/[% profile.drink || "<em>Unknown</em>" %]
+					</td>
+				</tr>
+				[% END %]
+				[% IF profile.politics %]
+				<tr>
+					<td align="left" valign="middle">
+						<strong>Politics:</strong>
+					</td>
+					<td align="left" valign="middle">
+						[% profile.politics || default %]
+					</td>
+				</tr>
+				[% END %]
+				[% IF profile.religion %]
+				<tr>
+					<td align="left" valign="middle">
+						<strong>Religion:</strong>
+					</td>
+					<td align="left" valign="middle">
+						[% profile.religion || default %]
+					</td>
+				</tr>
+				[% END %]
+				[% IF profile.orientation %]
+				<tr>
+					<td align="left" valign="middle">
+						<strong>Sexuality:</strong>
+					</td>
+					<td align="left" valign="middle">
+						[% profile.orientation || default %]
+					</td>
+				</tr>
+				[% END %]
+				[% IF profile.dating %]
+				<tr>
+					<td align="left" valign="middle">
+						<strong>Dating&nbsp;Status:</strong>
+					</td>
+					<td align="left" valign="middle">
+						[% profile.dating || default %]
+					</td>
+				</tr>
+				[% END %]
+			</table><p>
+
+			<h3 style="margin-top: 0px">Contact Me</h3>
+
+			[% IF !profile.aim && !profile.yahoo && !profile.msn && !profile.xmpp && !profile.website %]
+				<em>No contact details listed.</em>
+			[% ELSE %]
+
+				<table width="100%" border="0" cellspacing="0" cellpadding="4">
+
+				[% IF profile.aim %]
+					<tr>
+						<td width="30" align="left" valign="middle" nowrap>
+							<img src="/ui/icons/aim.gif" alt="AIM" title="AOL Instant Messenger">
+							<strong>AIM:</strong>
+						</td>
+						<td align="left" valign="middle">
+							<a href="aim:goim?ScreenName=[% profile.aim %]">[% profile.aim %]</a><br>
+						</td>
+					</tr>
+				[% END %]
+				[% IF profile.yahoo %]
+					<tr>
+						<td align="left" valign="middle" nowrap>
+							<img src="/ui/icons/yahoo.gif" alt="Yahoo!" title="Yahoo!">
+							<strong>Yahoo!:</strong>
+						</td>
+						<td align="left" valign="middle">
+							<a href="ymsgr:sendim?[% profile.yahoo %]">[% profile.yahoo %]</a><br>
+						</td>
+					</tr>
+				[% END %]
+				[% IF profile.msn %]
+					<tr>
+						<td align="left" valign="middle" nowrap>
+								<img src="/ui/icons/msn.gif" alt="MSN" title="Windows Live Messenger">
+							<strong>MSN:</strong>
+						</td>
+						<td align="left" valign="middle">
+							<a href="mailto:[% profile.msn %]">[% profile.msn %]</a><br>
+						</td>
+					</tr>
+				[% END %]
+				[% IF profile.xmpp %]
+					<tr>
+						<td align="left" valign="middle" nowrap>
+							<img src="/ui/icons/xmpp.gif" alt="XMPP" title="eXtensible Messaging and Presence Protocol">
+							<strong>XMPP/GTalk:</strong>
+						</td>
+						<td align="left" valign="middle">
+							<a href="mailto:[% profile.xmpp %]">[% profile.xmpp %]</a><br>
+						</td>
+					</tr>
+				[% END %]
+				[% IF profile.website %]
+					<tr>
+						<td align="left" valign="middle" nowrap>
+							<img src="/ui/icons/www.gif" alt="WWW" title="WWW">
+							<strong>Website:</strong>
+						</td>
+						<td align="left" valign="middle">
+							<a href="[% IF profile.website.match('^http:\/\/') %][% profile.website %][% ELSE %]http://[% profile.website %][% END %]">[% profile.website.remove('^http:\/\/').remove('\/$').substr(0,60) %]</a>
+						</td>
+					</tr>
+				[% END %]
+
+				</table>
+			[% END %]
+		</td>
+		<td width="67%" align="left" valign="top">
+			[% default = "<em>" _ profile.displayname _ " hasn't filled this section out yet.</em>" %]
+			<h3 style="margin-top: 0px">About Me</h3>
+
+			[% profile.about.replace("\n","<br>") || default %]
+
+			[% IF profile.whatever %]
+				<h3>Whatever I Want</h3>
+
+				[% profile.whatever.replace("\n","<br>") %]
+			[% END %]
+
+			[% IF profile.music || profile.movies || profile.books || profile.quotes %]
+			<h3>Favorites...</h3>
+			[% END %]
+
+			[% IF profile.music %]
+				<strong class="bigger">Music:</strong><p>
+				[% profile.music.replace("\n","<br>") %]<p>
+			[% END %]
+
+			[% IF profile.movies %]
+				<strong class="bigger">Movies:</strong><p>
+				[% profile.movies.replace("\n","<br>") %]<p>
+			[% END %]
+
+			[% IF profile.books %]
+				<strong class="bigger">Books:</strong><p>
+				[% profile.books.replace("\n","<br>") %]<p>
+			[% END %]
+
+			[% IF profile.quotes %]
+				<strong class="bigger">Quotes:</strong><p>
+				[% profile.quotes.replace("\n","<br>") || default %]
+			[% END %]
+		</td>
+	</tr>
+</table>
+[% END %]

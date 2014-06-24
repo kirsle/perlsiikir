@@ -1,0 +1,238 @@
+[% title = "Add Comment" %]
+
+[% IF show_privacy %]
+	<h1>Subscribing to Comments</h1>
+
+	When posting a comment on this site, you can optionally subscribe to future
+	comments on the same page (so you can get an e-mail notification when
+	somebody answers your questions, for example).<p>
+
+	You can unsubscribe from these e-mails in the future by clicking a link in
+	the e-mail. Or, you can unsubscribe from <em>all</em> comment threads by
+	entering your e-mail address in the form below.
+
+	<h2>Privacy Policy</h2>
+
+	<ul>
+		<li>Your e-mail address that you use when you post the comment will
+			<em>only</em> be used for sending you notifications via e-mail
+			when somebody else replies to the comment thread.</li>
+		<li>Your e-mail will not be visible to anybody else on this site.</li>
+		<li>Your e-mail won't be given to any spammers so you don't need to
+			worry about junk mail.</li>
+		<li>You can unsubscribe from individual comment threads by using the
+			link provided in the notification e-mail. You can unsubscribe from
+			ALL threads by using the form on this page.</li>
+	</ul>
+
+	<form name="unsub" action="/comment" method="POST">
+	<input type="hidden" name="do" value="unsubscribe">
+	<input type="hidden" name="u" value="">
+	<input type="hidden" name="thread" value="all">
+
+	<h2>Unsubscribe from All Comment Threads:</h2>
+
+	Enter the e-mail address to be removed from the subscription list.<br>
+	<input type="text" size="40" name="email"><p>
+	<input type="submit" value="Unsubscribe">
+
+	<div style="display: none">
+		Do not touch these fields.<p>
+		<input type="text" name="url" value="http://"><br>
+		<input type="text" name="message">
+	</div>
+
+	</form>
+[% ELSIF action == "unsubscribe" %]
+	<h1>Unsubscribed!</h1>
+
+	You have been unsubscribed.
+[% ELSIF action == "preview" %]
+	<h1>Comment Preview</h1>
+
+	This is a preview of what your comment is going to look like once posted.<p>
+
+	<hr><p>
+
+	[% param.preview %]<p>
+
+	<hr><p>
+
+	[% IF param.subscribe == "true" && param.contact %]
+		You will be subscribed to future comments on this thread. Notification
+		e-mails will be sent to [% param.contact | html %].<p>
+	[% END %]
+
+	<form name="preview" action="/comment" method="POST">
+	<input type="hidden" name="do" value="post">
+	<input type="hidden" name="user" value="[% param.user %]">
+	<input type="hidden" name="thread" value="[% param.thread %]">
+	<input type="hidden" name="url" value="[% param.url %]">
+	<input type="hidden" name="subject" value="[% param.subject | html %]">
+	<input type="hidden" name="name" value="[% param.name | html %]">
+	<input type="hidden" name="image" value="[% param.image | html %]">
+	<input type="hidden" name="message" value="[% param.message | html %]">
+	<input type="hidden" name="contact" value="[% param.contact | html %]">
+	<input type="hidden" name="subscribe" value="[% param.subscribe | html %]">
+	<input type="submit" value="Publish Comment">
+	</form>
+[% ELSIF action == "post" %]
+	<h1>Comment Posted</h1>
+
+	Your comment has been posted.<p>
+
+	Return to: <a href="[% param.url %]">[% param.subject %]</a>
+[% ELSIF action == "delete" %]
+	<h1>Comment Deleted</h1>
+
+	The comment has been deleted. <a href="javascript:history.go(-1)">Back.</a>
+[% ELSE %]
+	There [% IF comments.size == 1 %]is[% ELSE %]are[% END %] [% comments.size %] comment[% "s" UNLESS comments.size == 1 %] on this page.<p>
+
+	[% FOREACH comment = comment_id %]
+		[% poster = comments.$comment.uid %]
+		<div class="comment">
+			<div class="comment-author">
+				[% IF users.$poster.username %]
+				<a href="/users/[% users.$poster.username %]">
+					[% IF users.$poster.photo.avatar %]
+					<div class="siikir-avatar"><img src="[% photopub %]/[% users.$poster.photo.avatar %]" alt="[% users.$poster.name | html %]"></div>
+					[% ELSE %]
+					<div class="siikir-avatar"><img src="/static/images/shy-avatar.png" alt="[% users.$poster.name | html %]"></div>
+					[% END %]
+				</a>
+				<a href="/users/[% users.$poster.username %]"><strong>[% users.$poster.username %]</strong></a>
+				[% ELSE %]
+					[% IF comments.$comment.image %]
+						<img src="[% comments.$comment.image %]" alt="guest" width="96" height="96"><br>
+					[% ELSE %]
+						<img src="/static/images/shy-avatar.png" alt="guest"><br>
+					[% END %]
+					<strong>guest</strong>
+				[% END %]
+			</div>
+
+			<strong>Posted on [% comments.$comment.pretty_time %] by [% IF users.$poster.name %]<a href="/users/[% users.$poster.username %]">[% users.$poster.name %]</a>[% ELSE %][% comments.$comment.name || "Anonymous" %][% END %]
+			[% IF comments.$comment.image.match("graph\.facebook\.com") %] via Facebook.[% END %]</strong><p>
+
+			[% comments.$comment.message.replace("&amp;","&").replace("\n","<br>") %]
+
+			<div class="clear">
+				[% IF isAdmin %]
+					[IP: [% comments.$comment.ip %] | <a href="/comment?do=delete&user=[% param.user %]&thread=[% param.thread %]&comment=[% comment %]" onClick="return window.confirm('Are you sure you want to delete this?')">Delete</a>]
+				[% END %]
+			</div>
+		</div><p>
+	[% END %]
+
+	<h2>Leave a Comment</h2>
+
+	[%# Facebook Connect? %]
+	[% IF fb_graph && !login %]
+		<div id="fb-root"></div>
+		<script src="http://connect.facebook.net/en_US/all.js"></script>
+		<script>
+			FB.init({
+				appId: '[% fb_app_id %]',
+				cookie: true,
+				status: true,
+				xfbml: true
+			});
+
+			setTimeout("checkFacebookLogin()", 500);
+
+			function checkFacebookLogin () {
+				FB.api('/me', function (user) {
+					if (user != null && user.id != null) {
+						var login = $("#facebookbutton");
+						var image = $("#fbimage");
+						var url   = $("#image");
+						var nick  = $("#name");
+						login.hide();
+						image.attr("src", "http://graph.facebook.com/" + user.id + "/picture");
+						nick.val(user.name);
+						url.val("http://graph.facebook.com/" + user.id + "/picture");
+						nick.attr("readonly", "readonly");
+						image.show();
+					}
+					else {
+						// Try again.
+						setTimeout("checkFacebookLogin()", 500);
+					}
+				});
+			}
+		</script>
+
+		<div id="facebookbutton">
+			<fb:login-button>
+				Login with Facebook
+			</fb:login-button>
+		</div>
+	[% END %]
+
+	<form name="comment" action="/comment" method="POST">
+	<input type="hidden" name="do" value="preview">
+	<input type="hidden" name="user" value="[% param.user %]">
+	<input type="hidden" name="thread" value="[% param.thread %]">
+	<input type="hidden" name="url" value="[% param.url %]">
+	<input type="hidden" name="subject" value="[% param.subject | html %]">
+	<table border="0" cellspacing="2" cellpadding="2">
+		<tr>
+			<td align="left" valign="middle">
+				Your name:
+			</td>
+			[% IF login || fb_graph %]
+				<td align="left" valign="middle">
+					[% IF login %]
+						<strong>[% account.profile.displayname %]</strong>
+					[% ELSE %]
+						<input type="hidden" name="image" id="image" value="">
+						<img id="fbimage" style="display: none">
+						<input type="text" size="40" name="name" id="name">
+					[% END %]
+				</td>
+			[% ELSE %]
+			<td align="left" valign="middle">
+					<input type="text" size="40" name="name" id="name">
+			</td>
+			[% END %]
+		</tr>
+		[% IF !login %]
+		<tr>
+			<td align="left" valign="middle">
+				Your Email:
+			</td>
+			<td align="left" valign="middle">
+				<input type="text" size="40" name="contact"> <small>(optional)</small>
+			</td>
+		</tr>
+		[% END %]
+		<tr>
+			<td align="left" valign="top">
+				Message:
+			</td>
+			<td colspan="2" align="left" valign="top">
+				<textarea cols="40" rows="8" name="message" style="width: 100%"></textarea><br>
+				<small>You can use <a href="/emoticons" target="_blank">emoticons</a> in your comment (opens in new window).</small>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="3" align="left" valign="top">
+				<label>
+					<input type="checkbox" name="subscribe" value="true">
+					Notify me of future comments on this page via e-mail
+					(<a href="/comment/privacy" target="_blank">privacy policy</a>)
+				</label>
+			</td>
+		</tr>
+	</table><p>
+
+	<div style="display: none">
+		If you can see this, don't touch the following fields.<br>
+		<input type="text" name="website" value="http://"><br>
+		<input type="text" name="email" value="">
+	</div>
+
+	<input type="submit" value="Leave Comment">
+	</form>
+[% END %]

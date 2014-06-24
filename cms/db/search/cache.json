@@ -1,0 +1,14 @@
+{
+   "locations" : {
+      "1" : {
+         "userid" : "1",
+         "name" : "Administrator",
+         "longitude" : "-118.39804",
+         "latitude" : "34.030560",
+         "photo" : "",
+         "tag" : "26 / male",
+         "username" : "admin"
+      }
+   },
+   "unknown" : {}
+}

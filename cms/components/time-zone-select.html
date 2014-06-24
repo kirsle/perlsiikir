@@ -1,0 +1,13 @@
+[% UNLESS current_timezone %]
+	[% current_timezone = 0 %]
+[% END %]
+<select name="timezone">
+[% tzi = 0 %]
+[% WHILE tzi < constants.timezones.size %][%#>%]
+	[% tz_name = constants.timezones.$tzi %]
+	[% tzi = tzi + 1 %]
+	[% tz_off  = constants.timezones.$tzi %]
+	[% tzi = tzi + 1 %]
+	<option value="[% tz_off %]"[% " selected" IF current_timezone == tz_off %]>[% tz_name %]</option>
+[% END %]
+</select>

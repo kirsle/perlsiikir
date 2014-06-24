@@ -1,0 +1,55 @@
+[% title = "Edit My Profile" %]
+
+[%# Must be logged in %]
+[% IF login != 1 %]
+	[% INCLUDE "account/login.html" %]
+[% ELSIF success %]
+	<h1>Profile Saved!</h1>
+
+	Your profile has been saved! <a href="/users/[% values.username %]">View your profile.</a>
+[% ELSE %]
+	<h1>Edit My Profile</h1>
+
+	<div class="center">
+		[
+		[% i = 0 %]
+		[% FOREACH category = fields %]
+			<a href="#" id="selector-[% i %]" onClick="return showSection([% i %])"[% IF i == 0 %] style="font-weight: bold"[% END %]>[% category.category %]</a>
+			[% IF i != fields.size - 1 %]
+				|
+			[% END %]
+			[% i = i + 1 %]
+		[% END %]
+		]
+	</div>
+	<p>
+
+	<form name="profile" action="/profile/edit/save" method="POST">
+		[%# Include the field editor %]
+		[% INCLUDE "field-editor.html" %]
+
+		<p>
+		<div class="center">
+			<input type="submit" value="Save All Changes">
+		</div>
+	</form>
+
+	<script type="text/javascript">
+	var curSection = 0;
+	function showSection (id) {
+		if (id == curSection) {
+			return false;
+		}
+
+		// Hide the current div.
+		$("#category-" + curSection).css("display", "none");
+		$("#selector-" + curSection).css("font-weight", "");
+
+		// Show the new div.
+		curSection = id;
+		$("#category-" + id).css("display", "block");
+		$("#selector-" + id).css("font-weight", "bold");
+		return false;
+	}
+	</script>
+[% END %]

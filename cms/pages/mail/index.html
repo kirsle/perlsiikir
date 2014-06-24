@@ -1,0 +1,201 @@
+[% title = "Messaging" %]
+
+[%# Size of thumbnails: tiny for web, mini for mobile. %]
+[% IF mobile %]
+	[% tsize = "70" %]
+[% ELSE %]
+	[% tsize = "120" %]
+[% END %]
+
+[%# Must be logged in %]
+[% IF login != 1 %]
+	[% INCLUDE "account/login.html" %]
+[% ELSIF action == "delete" %]
+	<h1>Message Deleted</h1>
+
+	<a href="/mail[% '/sent' IF mailbox == 'sent' %]">Return to your [% mailbox %] folder.</a>
+[% ELSIF action == "read" %]
+	[% title = message.subject %]
+	<h1>[% message.subject || "No Subject" %]</h1>
+
+	<div class="avatar">
+		[% IF cache.${message.from}.username %]
+			<a href="/users/[% cache.${message.from}.link %]">
+		[% END %]
+		[% IF cache.${message.from}.photo %]
+			<img src="[% photopub %]/[% cache.${message.from}.photo %]" alt="[% cache.${message.from}.name %]">
+		[% ELSE %]
+			<img src="/static/images/shy-avatar.png" alt="[% cache.${message.from}.name %]">
+		[% END %]</a><br>
+
+		[% IF cache.${message.from}.username %]
+			<a href="/users/[% cache.${message.from}.link %]">[% cache.${message.from}.name %]</a>
+		[% ELSE %]
+			Deleted Profile
+		[% END %]
+	</div>
+
+	<div class="timestamp">
+		Sent on [% message.time_pretty %] by
+		[% IF cache.${message.from} %]
+			<a href="/users/[% cache.${message.from}.link %]">[% cache.${message.from}.name %]</a>
+		[% ELSE %]
+			[deleted user]
+		[% END %]
+	</div>
+
+	[% message.message.replace("\n","<br>") %]<p>
+
+	[%# Can only reply to users who aren't deleted %]
+	[% IF cache.${message.from}.username %]
+		<form name="reply" action="/mail/compose?to=[% cache.${message.from}.link %]" method="POST">
+		<div style="margin-top: 64px">
+			[% newsubj = message.subject.replace("Re: ","") %]
+			<input type="hidden" name="subject" value="Re: [% newsubj %]">
+			<input type="hidden" name="message" value="<br><br><br>----------
+
+[% cache.${message.from}.name %] wrote:
+
+[% message.message | html %]">
+			<input type="submit" value="Send Reply">
+		</div>
+		</form>
+	[% ELSE %]
+		<strong>This account has been deleted. You can not reply to this message.</strong>
+	[% END %]
+
+	<div class="clear"></div>
+[% ELSIF mailbox == "inbox" || mailbox == "sent" %]
+	[% title = mailbox | ucfirst %]
+	<h1>[% mailbox | ucfirst %]</h1>
+
+	<strong>Go to:</strong> [
+	[% IF mailbox == "inbox" %]
+		<strong>Inbox</strong>
+	[% ELSE %]
+		<a href="/mail">Inbox</a>
+	[% END %]
+	|
+	[% IF mailbox == "sent" %]
+		<strong>Sent Messages</strong>
+	[% ELSE %]
+		<a href="/mail/sent">Sent Messages</a>
+	[% END %]
+	]<p>
+
+	<hr><p>
+
+	<div class="floater">
+		<div class="right">
+			[% IF page > 1 %]
+			<a href="/mail[% '/sent' UNLESS mailbox == 'inbox' %]?page=[% (page - 1) %]">
+			[% END %]
+			&lt; Previous
+			[% IF page > 1 %]
+			</a>
+			[% END %]
+
+			|
+
+			[% IF page < pages %][%#>%]
+			<a href="/mail[% '/sent' UNLESS mailbox == 'inbox' %]?page=[% (page + 1) %]">
+			[% END %]
+			Next &gt;
+			[% IF page < pages %][%#>%]
+			</a>
+			[% END %]
+		</div>
+
+		<div class="left">
+			You have <strong>[% IF total < 0 %]0[% ELSE %][% (total + 1) %][% END %][%#>%]</strong> message[% "s" UNLESS messages.size == 1 %] in your [% mailbox %] folder.<p>
+			Displaying messages [% IF end == 0 %]0[% ELSE %][% (start + 1) %][% END %] to [% end %] (page [% page %] of [% IF pages == 0 %]1[% ELSE %][% pages %][% END %]).
+		</div>
+
+		<div class="clear"></div>
+	</div><p>
+
+	<form name="massactor" action="/mail[% '/sent' UNLESS mailbox == 'inbox' %]" method="POST">
+	<input type="hidden" name="action" value="delete">
+	<table width="100%" border="0" cellspacing="0" cellpadding="4">
+		<tr>
+			<td width="[% tsize %]" align="left" valign="middle">
+				<strong>[% IF mailbox == "inbox" %]From[% ELSE %]To[% END %]</strong>
+			</td>
+			<td align="left" valign="middle">
+				<strong>Subject</strong>
+			</td>
+			<td width="90" align="left" valign="middle">
+				<label>
+					<input type="checkbox" id="selectall" name="selectall" onClick="mailSelectAll()">
+					<strong>Delete</strong>
+				</label>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="3" align="center" valign="middle"><hr></td>
+		</tr>
+		[% IF messages.size > 0 %]
+			[% FOREACH message IN messages %]
+				[% from = message.from %]
+				[% IF mailbox == "sent" %]
+					[% from = message.to %]
+					[% message.read = 1 %]
+				[% END %]
+				<tr>
+					<td align="center" valign="middle">
+						[% IF cache.$from.link %]
+							<a href="/users/[% cache.$from.link %]">
+							[% IF cache.$from.photo %]
+								<img src="[% photopub %]/[% cache.$from.photo %]" alt="[% cache.$from.name %]" class="portrait">
+							[% ELSE %]
+								<img src="/static/images/shy-avatar.png" alt="[% cache.$from.name %]" class="portrait">
+							[% END %]</a><br>
+							<a href="/users/[% cache.$from.link %]">[% cache.$from.name %]</a>
+						[% ELSE %]
+							<img src="/static/images/shy-avatar.png" alt="Deleted Profile" class="portrait">
+							Deleted Profile
+						[% END %]
+					</td>
+					<td align="left" valign="middle">
+						[% "<strong>New!</strong>" UNLESS message.read %]
+						<a href="/mail/[% mailbox %]/read/[% message.time %]">
+						[% "<strong>" UNLESS message.read %]
+						[% message.subject %]
+						[% "</strong>" UNLESS message.read %]
+						</a><br>
+						Sent on: [% message.time_pretty %]
+					</td>
+					<td align="left" valign="middle">
+						<label>
+							<input type="checkbox" name="mailid" value="[% message.time %]" class="mailid"> Select
+						</label>
+					</td>
+				</tr>
+			[% END %]
+			<tr>
+				<td colspan="3" align="center" valign="middle"><hr></td>
+			</tr>
+		[% ELSE %]
+			<tr>
+				<td colspan="3" align="left" valign="middle">
+					<em>There are no messages.</em>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="3" align="center" valign="middle"><hr></td>
+			</tr>
+		[% END %]
+	</table><p>
+
+	<input type="submit" value="Delete Selected">
+	</form>
+
+	<script type="text/javascript">
+	function mailSelectAll() {
+		var chk = $("#selectall").attr("checked");
+		$(".mailid").each(function() {
+			$(this).attr("checked", chk);
+		});
+	}
+	</script>
+[% END %]

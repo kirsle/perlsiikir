@@ -1,0 +1,16 @@
+<IfModule mod_rewrite.c>
+	RewriteEngine on
+	RewriteBase /
+	RewriteCond %{REQUEST_FILENAME} !-f
+	RewriteCond %{REQUEST_FILENAME} !-d
+	RewriteRule . /index.cgi [L]
+	RewriteRule ^$ /index.cgi [L]
+	# Uncomment these and comment out the above to use FastCGI
+	# Also remove the non-fcgi "index.cgi"
+	#RewriteRule . /fcgi/index.cgi [L]
+	#RewriteRule ^$ /fcgi/index.cgi [L]
+</IfModule>
+
+# Limit file uploads to no greater than 6 MB + 100 KB
+# 6291456 + 102400
+LimitRequestBody 6393856

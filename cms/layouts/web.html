@@ -1,0 +1,40 @@
+[% INCLUDE "web-header.html" %]
+
+<div id="content">
+
+[% IF alert %]
+	<h1>Alert!</h1>
+	[% alert %]
+[% END %]
+
+[% IF errors.size > 0 %]
+	<h1>Please correct the following errors and try again:</h1>
+
+	<ul>
+	[% FOREACH item IN errors %]
+		<li>[% item %]</li>
+	[% END %]
+	</ul>
+[% END %]
+
+[% IF warnings.size > 0 %]
+	<h1>The following warnings were encountered:</h1>
+
+	<ul>
+	[% FOREACH item IN warnings %]
+		<li>[% item %]</li>
+	[% END %]
+	</ul>
+[% END %]
+
+[% content %]
+
+<footer>
+	<div>
+		Copyright &copy; 2014 Noah Petherbridge<br>
+		Powered by [% cms.name %] [% cms.version %]<br>
+		Page generated in $runtime$s.
+	</div>
+</footer>
+
+[% INCLUDE "web-footer.html" %]

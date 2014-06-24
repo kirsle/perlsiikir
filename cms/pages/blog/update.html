@@ -1,0 +1,166 @@
+[% title = "Update Blog" %]
+
+[% IF published %]
+	<h1>Blog Posted!</h1>
+
+	Your blog has been updated. <a href="/blog/[% account.username %]/[% fid %]">View the blog entry</a>.
+[% ELSIF param.delete %]
+	[% IF param.confirm == "true" %]
+		<h1>Post Deleted!</h1>
+
+		<a href="/blog/[% account.username %]">Return to your blog.</a>
+	[% ELSE %]
+		<h1>Delete Post?</h1>
+
+		Are you sure you want to delete the post titled "<strong>[% subject %]</strong>"?<p>
+
+		<a href="/blog/update?id=[% param.id %]&delete=1&confirm=true">Yes, delete it</a> |
+		<a href="/blog/[% account.username %]/[% post.fid %]">No, do NOT delete it</a>
+	[% END %]
+[% ELSE %]
+	<h1>Update Blog</h1>
+
+	<form name="editor" action="/blog/update" method="post">
+	<input type="hidden" name="id" value="[% param.id %]">
+	<input type="hidden" name="publish" value="true">
+
+	<nofilter>
+
+	<strong>Subject:</strong><br>
+	<input type="text" size="80" name="subject" value="[% subject | html %]"><p>
+
+	<strong>Body:</strong><br>
+	<textarea cols="80" rows="12" name="body">[% body | html %]</textarea><br>
+	<a href="/emoticons" target="_blank">Emoticon reference</a> (opens in new window)<p>
+
+	<strong>Avatar:</strong><br>
+	<span id="avatar-preview"></span>
+	<select name="avatar" id="avatar" onChange="updateAvatar()">
+		<option value=""[% " selected" IF avatar == "" %]>Use my profile picture</option>
+		[% FOREACH pic IN avatars %]
+		<option value="[% pic %]"[% " selected" IF avatar == pic %]>[% pic %]</option>
+		[% END %]
+	</select><p>
+
+	<strong>Categories:</strong><br>
+	<small>Comma-separated list, e.g.: General, HTML, Perl, Web Design</small><br>
+	<input type="text" size="40" name="categories" value="[% categories %]"><p>
+
+	</nofilter>
+
+	<strong>Privacy:</strong><br>
+	<select name="privacy">
+		<option value="public"[% " selected" IF privacy == "public" %]>
+			Public: everybody can see this blog entry
+		</option>
+		<option value="members"[% " selected" IF privacy == "members" %]>
+			Members: only logged-in users can see this entry
+		</option>
+		<option value="friends"[% " selected" IF privacy == "friends" %]>
+			Friends: only people on my friends list can see this entry
+		</option>
+		<option value="private"[% " selected" IF privacy == "private" %]>
+			Private: only I can see this entry
+		</option>
+	</select><p>
+
+	<strong>Options:</strong><br>
+	<label>
+		<input type="checkbox" name="no-emoticons" value="true"[% " checked" IF emoticons == 0 %]>
+		Disable graphical emoticons
+	</label><br>
+	<label>
+		<input type="checkbox" name="no-replies" value="true"[% " checked" IF replies == 0 %]>
+		Disable comments on this entry
+	</label><p>
+
+	<strong>Time Stamp:</strong><br>
+	<input type="text" size="2" name="month" value="[% month %]"> /
+	<input type="text" size="2" name="day" value="[% day %]"> /
+	<input type="text" size="4" name="year" value="[% year %]"> @
+	<input type="text" size="2" name="hour" value="[% hour %]"> :
+	<input type="text" size="2" name="min" value="[% min %]"> :
+	<input type="text" size="2" name="sec" value="[% sec %]"><br>
+	mm / dd / yyyy @ hh:mm:ss<br>
+	<label>
+		<input type="checkbox" name="autoup" value="yes" id="autoup"[% " checked" IF param.id == "" %]>
+		Automatically update
+	</label><p>
+
+	<input type="submit" value="Publish Entry">
+	</form>
+
+	<script type="text/javascript">
+	var userPic = "[% photopub %]/[% userpic.avatar %]";
+	document.onLoad = init();
+
+	function init() {
+		// Preview their selected avatar.
+		updateAvatar();
+
+		// Start ticking the timestamp updater.
+		setTimeout("timestamps()", 500);
+	}
+
+	function updateAvatar() {
+		var chosen = document.getElementById("avatar").value;
+
+		var picture = ""; // which pic to show
+		if (chosen == "") {
+			// Selected to use their own user pic
+			if (userPic.length > 0) {
+				picture = userPic;
+			}
+		}
+		else {
+			// Selected a global avatar
+			picture = "[% avatarpub %]/" + chosen;
+		}
+
+		// Show the pic
+		if (picture.length > 0) {
+			document.getElementById("avatar-preview").innerHTML =
+				"<img src=\"" + picture + "\" alt=\"Preview\"><br>";
+		}
+		else {
+			document.getElementById("avatar-preview").innerHTML = "";
+		}
+	}
+
+	function timestamps() {
+		if (document.forms["editor"].autoup.checked == true) {
+			var d = new Date();
+			var mon = d.getMonth();     // 0..11
+			var day = d.getDate();      // 1..31
+			var year = d.getFullYear(); // 2008
+			var hour = d.getHours();    // 0..23
+			var min  = d.getMinutes();  // 0..59
+			var sec  = d.getSeconds();  // 0..59
+
+			// Adjust the dates.
+			mon++; // Set month to 1..12
+			mon = padout(mon);
+			day = padout(day);
+			hour = padout(hour);
+			min  = padout(min);
+			sec  = padout(sec);
+
+			// Update the fields.
+			document.forms["editor"].month.value = mon;
+			document.forms["editor"].day.value   = day;
+			document.forms["editor"].year.value  = year;
+			document.forms["editor"].hour.value  = hour;
+			document.forms["editor"].min.value   = min;
+			document.forms["editor"].sec.value   = sec;
+		}
+		setTimeout("timestamps()", 500);
+	}
+
+	function padout(num) {
+		if (num < 10) {
+			return '0' + num;
+		}
+		return num;
+	}
+	</script>
+[% END %]

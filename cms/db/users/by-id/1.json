@@ -1,0 +1,12 @@
+{
+   "account" : {
+      "password" : "f4364325257e374f821b0422626209f1",
+      "id" : "1",
+      "blocked" : [],
+      "level" : "admin",
+      "lastseen" : "1403651640",
+      "dob" : "1987-10-12",
+      "salt" : "Ue{~BpKpGw+=vn&~",
+      "username" : "admin"
+   }
+}

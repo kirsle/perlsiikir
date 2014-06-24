@@ -1,0 +1,117 @@
+[%# Take data in a var named "fields" and render it. %]
+
+[% i = 0 %]
+[% FOREACH category = fields %]
+	<div id="category-[% i %]" style="display: [% IF i == 0 %]block[% ELSE %]none[% END %]">
+		<h2>[% category.category %]</h2>
+
+		[% FOREACH field = category.fields %]
+			[% IF field.section %]
+				<h3>[% field.section %]</h3>
+			[% ELSE %]
+				[% NEXT UNLESS field.name %]
+				[% NEXT UNLESS field.type %]
+
+				[%# Fetch the value name for a shortcut %]
+				[% value = values.${field.name} %]
+				[% IF field.icon %]
+					<img src="/ui/icons/[% field.icon %].gif" alt="[% field.label || field.name %]">
+				[% END %]
+				<strong class="bigger">[% field.label || field.name %]</strong><br>
+				[% IF field.text %]
+					[% field.text %]<br>
+				[% END %]
+
+				[% IF field.type == "text" %]
+					<input type="text" size="40" name="[% field.name %]" value="[% value %]">
+				[% ELSIF field.type == "number" %]
+					<input type="number" size="40" name="[% field.name %]" value="[% value %]"[% IF field.maxlength %] maxlength="[% field.maxlength %]"[% END %]>
+				[% ELSIF field.type == "radio" %]
+					[% j = 0 %]
+					[% WHILE j < field.options.size %][%#>%]
+						[% jValue = field.options.$j %]
+						[% j = j + 1 %]
+						[% jContent = field.options.$j %]
+						[% j = j + 1 %]
+
+						<label>
+							<input type="radio" name="[% field.name %]" value="[% jValue %]"[% " checked" IF value == jValue %]>
+							[% jContent %]
+						</label><br>
+					[% END %]
+				[% ELSIF field.type == "select" %]
+					<select name="[% field.name %]">
+					[% j = 0 %]
+					[% WHILE j < field.options.size %][%#>%]
+						[% jValue = field.options.$j %]
+						[% j = j + 1 %]
+						[% jContent = field.options.$j %]
+						[% j = j + 1 %]
+
+						<option value="[% jValue %]"[% " selected" IF value == jValue %]>[% jContent %]</option>
+					[% END %]
+					</select>
+				[% ELSIF field.type == "height" %]
+					[% tmp   = "${field.name}-feet" %]
+					[% value = values.$tmp %]
+					<select name="[% field.name %]-feet">
+					[% j = 4 %]
+					[% WHILE j <= 7 %][%#>%]
+						<option value="[% j %]"[% " selected" IF value == j %]>[% j %]</option>
+						[% j = j + 1 %]
+					[% END %]
+						<option value=""[% " selected" IF value == "" %]>--</option>
+					</select> feet
+
+					[% tmp   = "${field.name}-inches" %]
+					[% value = values.$tmp %]
+					<select name="[% field.name %]-inches">
+					[% j = 0 %]
+					[% WHILE j <= 11 %][%#>%]
+						<option value="[% j %]"[% " selected" IF value == j %]>[% j %]</option>
+						[% j = j + 1 %]
+					[% END %]
+						<option value=""[% " selected" IF value == "" %]>--</option>
+					</select> inches
+				[% ELSIF field.type == "number-range" %]
+					<select name="[% field.name %]">
+					[% j = field.high || 100 %]
+					[% k = field.low  || 0 %]
+					[% WHILE j >= k %]
+						<option value="[% j %]"[% " selected" IF value == j %]>[% j %] [% field.suffix %]</option>
+						[% j = j - 1 %]
+					[% END %]
+						<option value=""[% " selected" IF value == "" %]>Prefer not to say</option>
+					</select>
+				[% ELSIF field.type == "checkgroup" %]
+					[% j = 0 %]
+					[% WHILE j < field.options.size %][%#>%]
+						[% jValue = field.options.$j %]
+						[% j = j + 1 %]
+						[% jContent = field.options.$j %]
+						[% j = j + 1 %]
+
+						<label>
+							<input type="checkbox" name="[% field.name %]" value="[% jValue %]"[% " checked" IF value.search(jValue) %]>
+							[% jContent %]
+						</label><br>
+					[% END %]
+				[% ELSIF field.type == "essay" %]
+					<textarea name="[% field.name %]" cols="40" rows="8">[% value %]</textarea>
+				[% ELSIF field.type == "timezone" %]
+					[% current_timezone = value %]
+					[% INCLUDE "time-zone-select.html" %]
+				[% ELSIF field.type == "boolean" %]
+					<label>
+						<input type="checkbox" name="[% field.name %]" value="true"[% " checked" IF value %]> Enabled
+					</label>
+				[% ELSE %]
+					<strong>error unknown type [% field.type %]</strong>
+				[% END %]
+				<p>
+			[% END %]
+		[% END %]
+	</div>
+
+	[% i = i + 1 %]
+[% END %]

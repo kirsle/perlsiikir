@@ -1,0 +1,23 @@
+[% title = "Emoticon List" %]
+<h1>Emoticon List</h1>
+
+<strong>Smiley Theme: "[% smileys.name %]"</strong><p>
+
+<table border="1" cellspacing="0" cellpadding="2">
+	<tr>
+		<th>Emoticon</th>
+		<th>Trigger Text</th>
+	</tr>
+	[% FOREACH img = smileys.map.keys.sort %]
+	<tr>
+		<td align="center" valign="middle">
+			<img src="[% http %]/[% smileys.theme %]/[% img %]">
+		</td>
+		<td align="left" valign="middle">
+			[% FOREACH code = smileys.map.$img %]
+				[% code %]&nbsp;&nbsp;&nbsp;&nbsp;
+			[% END %]
+		</td>
+	</tr>
+	[% END %]
+</table>

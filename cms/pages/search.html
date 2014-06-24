@@ -1,0 +1,84 @@
+[% title = "Search Profiles" %]
+
+[% IF results.size > 0 %]
+	<h2>Nearby Users</h2>
+
+	[% IF results.error %]
+		There are no search results because Siikir doesn't know where you're located. You can try
+		your search again by entering a US zipcode to search nearby, <strong>OR</strong> you can
+		try to use your browser's Geolocation Services API.<p>
+
+		If your browser supports Geolocation (<a href="http://www.firefox.com/">Firefox 3.5+</a>
+		and recent versions of <a href="http://www.google.com/chrome">Chrome</a> do), you can enable
+		the Geolocation option on your <a href="/profile/edit">Edit Profile</a> page, under the
+		"Site Settings" tab.<p>
+
+		<form name="search" action="/search" method="GET">
+		<div>
+			<strong>Search Nearby a US Zipcode:</strong><br>
+			<input type="number" size="10" name="zipcode" value="90230" maxlength="5">
+
+			<input type="submit" value="Search">
+		</div>
+		</form>
+	[% ELSE %]
+
+	Showing results [% results.offset + 1 %] to [% results.offset + results.results.size %] out of [% results.total %] total
+	(page [% results.page %] of [% results.pages %]).<p>
+
+	<table width="100%" border="0" cellspacing="4" cellpadding="0">
+	[% i = 0 %]
+	[% FOREACH result = results.results %]
+		[% IF i == 0 %]
+		<tr>
+		[% END %]
+			<td width="25%" align="center" valign="top">
+				<a href="/users/[% result.link %]">
+				[% IF result.photo %]
+				<img src="/static/photos/[% result.photo %]" alt="[% result.displayname %]" class="portrait">
+				[% ELSE %]
+				<img src="/static/images/shy-tiny.png" alt="[% result.displayname %]" class="portrait">
+				[% END %]
+				</a><br>
+				<a href="/users/[% result.link %]">[% result.name %]</a><br>
+				[% result.tag %]<br>
+				<strong>[% result.distance %]</strong>
+				<br><br>&nbsp;
+			</td>
+		[% i = i + 1 %]
+		[% IF i == 4 %]
+			</tr>
+			[% i = 0 %]
+		[% END %]
+	[% END %]
+	[% IF i > 0 %]
+		[% WHILE i <= 4 %][%#>%]
+			<td width="25%" align="center" valign="top">&nbsp;</td>
+			[% i = i + 1 %]
+		[% END %]
+		</tr>
+	[% END %]
+	</table><p>
+
+	<div class="right">
+	[% IF results.page > 1 || results.pages > results.page %]
+		[
+		[% IF results.page > 1 %]
+			<a href="/search?page=[% results.page - 1 %]">&lt; Previous</a>
+			[% IF results.pages > results.page %]
+			|
+			[% END %]
+		[% END %]
+		[% IF results.pages > results.page %]
+			<a href="/search?page=[% results.page + 1 %]">Next &gt;</a>
+		[% END %]
+		]
+	[% END %]
+	</div>
+
+	<p>
+	<strong>Note:</strong> until GPS support is incorporated, all these users' locations
+	are based off their zipcodes, and the zipcode database Siikir uses isn't known for its
+	stunning accuracy. Locations are accurate to the county and not the city.
+	[% END %]
+[% END %]

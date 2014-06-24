@@ -1,0 +1,224 @@
+[% title = "View Photo" %]
+
+[%# Size of thumbnails: tiny for web, mini for mobile. %]
+[% IF mobile %]
+	[% tsize = "mini" %]
+[% ELSE %]
+	[% tsize = "tiny" %]
+[% END %]
+
+[% IF display == "index" %]
+	[% title = profile.displayname _ "'s Photo Albums" %]
+	<h1>[% profile.displayname %]'s Photo Albums</h1>
+
+	[% IF albums.size == 0 %]
+		[% IF uid == owneruid %]
+			You have not uploaded any photos yet.
+		[% ELSE %]
+			[<a href="/users/[% link %]">Back to profile</a>]<p>
+			This user has no photo albums available.
+		[% END %]
+	[% ELSE %]
+		[<a href="/users/[% link %]">Back to profile</a>]<p>
+		<table border="0" cellspacing="4" cellpadding="0" width="100%">
+		[% i = 0 %]
+		[% FOREACH album = albums %]
+			[% IF i == 0 %]
+			<tr>
+			[% END %]
+				<td width="25%" align="center" valign="top">
+					<a href="/photos/view/album/[% link %]/[% album.name %]">
+					[% IF album.cover %]
+						<img src="[% photopub %]/[% album.cover.$tsize %]" alt="[% album.name %]" class="portrait">
+					[% ELSE %]
+						<img src="/static/images/cover-[% tsize %].png" alt="[% album.name %]" class="portrait">
+					[% END %]
+					</a><br>
+					[%# All photos are private? %]
+					<a href="/photos/view/album/[% link %]/[% album.name %]"><strong>[% album.name %]</strong></a><br>
+					[% IF album.private %]
+						<img src="/static/icons/private.png" width="16" height="16" alt="Private Album" title="Private Album">
+					[% END %]
+					[% album.size %] photo[% "s" UNLESS album.size == 1 %]
+				</td>
+				[% i = i + 1 %]
+			[% IF i == 4 %]
+			</tr>
+			[% i = 0 %]
+			[% END %]
+		[% END %]
+
+		[%# Fill in empty cells %]
+		[% IF i > 0 %]
+			[% WHILE i < 4 %][%#>%]
+				<td width="25%" align="center" valign="top">&nbsp;</td>
+				[% i = i + 1 %]
+			[% END %]
+		[% END %]
+		</table>
+	[% END %]
+
+	[% IF uid == owneruid || isAdmin %]
+		<h2>Administrative Options</h2>
+		<ul>
+			<li><a href="/photos/upload">Upload photos</a></li>
+			<li><a href="/photos/admin/private?do=list">Who have I unlocked photos for?</a></li>
+			<li><a href="/photos/admin/share">Share photos with people outside of [% sitename %]</a></li>
+		</ul>
+	[% END %]
+[% ELSIF display == "album" %]
+	[% title = album %]
+	<h1>[% album %]</h1>
+
+	This album contains [% photos.size %] photo[% "s" UNLESS photos.size == 1 %].
+	[<a href="/photos/view/album/[% link %]">See all photos</a>]<p>
+
+	<table border="0" cellspacing="4" cellpadding="0" width="100%">
+	[% i = 0 %]
+	[% FOREACH photo = photos %]
+		[% IF i == 0 %]
+		<tr>
+		[% END %]
+			<td width="25%" align="center" valign="top">
+				<a href="/photos/view/[% link %]/[% photo.key %]">
+				[% IF photo.flagged && !photo.approved %]
+					<img src="/static/images/pending-[% tsize %].png" alt="[% photo.caption || 'Photo' %]" class="portrait">
+				[% ELSIF photo.adult && !account.profile.display.match('showadult') %]
+					<img src="/static/images/adult-[% tsize %].png" alt="[% photo.caption || 'Photo' %]" class="portrait">
+				[% ELSE %]
+					<img src="[% photopub %]/[% photo.$tsize %]" alt="[% photo.caption || 'Photo' %]" class="portrait">
+				[% END %]
+				</a><br>
+				[% IF photo.private %]
+					<img src="/static/icons/private.png" width="16" height="16" alt="Private Photo" title="Private Photo">
+				[% END %]
+				[% photo.caption || "&nbsp;" %]<br>
+				<a href="/photos/view/[% link %]/[% photo.key %]">[% photo.comments %] comment[% "s" UNLESS photo.comments == 1 %]</a>
+				[% IF photo.adult %]<br>
+				<small>(adult photo)</small>
+				[% END %]
+			</td>
+			[% i = i + 1 %]
+		[% IF i == 4 %]
+		</tr>
+		[% i = 0 %]
+		[% END %]
+	[% END %]
+
+	[%# Fill in empty cells %]
+	[% IF i > 0 %]
+		[% WHILE i < 4 %][%#>%]
+			<td width="25%" align="center" valign="top">&nbsp;</td>
+			[% i = i + 1 %]
+		[% END %]
+	[% END %]
+	</table>
+
+	[% IF uid == owneruid || isAdmin %]
+		<h2>Administrative Options</h2>
+		<ul>
+			<li><a href="/photos/upload">Upload photos</a></li>
+			[% IF !mobile %]
+				<li><a href="/photos/admin/arrange/[% album %]">Arrange Photos</a></li>
+			[% END %]
+			<li><a href="/photos/admin/private?do=list">Who have I unlocked photos for?</a></li>
+			<li><a href="/photos/admin/share">Share photos with people outside of [% sitename %]</a></li>
+		</ul>
+	[% END %]
+[% ELSIF display == "photo" %]
+	[% title = photo.caption || "View Photo" %]
+	<h1>[% photo.caption || "View Photo" %]</h1>
+
+	<div class="floater">
+		<div class="right">
+			[<a href="/users/[% link %]">Back to Profile</a> | <a href="/photos/view/album/[% link %]/[% photo.album %]">Back to Album</a>]
+		</div>
+
+		[% IF photo.position && !mobile %]
+		<div class="left">
+			[% IF photo.private %]
+				<img src="/static/icons/private.png" width="16" height="16" alt="Private Photo" title="Private Photo">
+			[% END %]
+			Photo [% photo.position %] of [% photo.siblings %]
+			[% IF photo.siblings > 1 %]
+				&nbsp;&nbsp;&nbsp;
+				[ <a href="/photos/view/[% link %]/[% photo.previous %]">&lt; Previous</a> |
+				<a href="/photos/view/[% link %]/[% photo.next %]">Next &gt;</a> ]
+			[% END %]
+		</div>
+		[% END %]
+
+		<div class="clear"></div>
+	</div><p>
+
+	[%# For mobile, show the small view %]
+	[% IF mobile %]
+		[% psize = "small" %]
+	[% ELSE %]
+		[% psize = "large" %]
+	[% END %]
+
+	<div class="center">
+		[% IF photo.next && photo.siblings > 1 %]
+			<a href="/photos/view/[% link %]/[% photo.next %]">
+		[% END %]
+
+		[% IF photo.flagged && !photo.approved %]
+			<img src="/static/images/pending-small.png" alt="Photo View" class="portrait">
+		[% ELSE %]
+			<img src="[% photopub %]/[% photo.$psize %]" alt="Photo View" class="portrait" onmousedown="return false" onmouseup="return false">
+		[% END %]
+		[% IF photo.next && photo.siblings > 1 %]
+		</a>
+		[% END %]
+
+		[%# Provide full link for mobile. %]
+		[% IF mobile %]
+			<p>
+			<a href="[% photopub %]/[% photo.large %]">View Full Size</a>
+		[% END %]
+	</div><p>
+
+	Uploaded on [% mtime %].
+
+	[% IF login %]
+		[% IF !photo.private && !photo.adult %]
+			<p>
+			Is this photo offensive? If so, <a href="/help/report?type=photo;user=[% link %];photo=[% photo.key %]">please report it</a>.
+		[% ELSIF !link.match("^~") %]
+			<p>
+			Is this photo offensive? If so, <a href="/help/report?type=violation;user=[% link %];photo=[% photo.key %]">please report it</a>.
+		[% END %]
+	[% END %]
+
+	<h2>Photo Comments</h2>
+
+	<include>/comment?user=[% profile.userid %]&thread=photos-[% photo.album %]-[% photo.key %]&url=http://[% env.SERVER_NAME %]/photos/view/[% profile.username %]/[% photo.key %]&subject=Photo Comment</include>
+
+	[% IF uid == owneruid || isAdmin %]
+		<h2>Administrative Options</h2>
+
+		<ul>
+			<li><a href="/photos/admin/crop/[% photo.key %]">Change Thumbnail Image</a></li>
+			[% IF photo.private %]
+				<li>
+					<img src="/static/icons/private.png" width="16" height="16" alt="Private Picture" title="Private Picture">
+					<a href="#" onClick="window.alert('You can\'t set a private picture as your profile picture.'); return false"><del>Set as profile picture</del></a>
+				</li>
+			[% ELSIF photo.adult %]
+				<li>
+					<a href="#" onClick="window.alert('You can\'t set an adult picture as your profile picture.'); return false"><del>Set as profile picture</del></a>
+				</li>
+			[% ELSE %]
+				<li><a href="/photos/admin/setdefault/[% photo.key %]">Set as profile picture</a></li>
+			[% END %]
+			[% IF photo.private %]
+				<li><a href="/photos/admin/setcover/[% photo.album %]/[% photo.key %]" onClick="return window.confirm('This is a private picture. If you set it as your album cover, then only users you have unlocked your private pictures for will see it; everyone else will see \'No Cover\' shown instead. Is this OK?')">Set album cover</a></li>
+			[% ELSE %]
+				<li><a href="/photos/admin/setcover/[% photo.album %]/[% photo.key %]">Set album cover</a></li>
+			[% END %]
+			<li><a href="/photos/admin/edit/[% photo.key %]">Edit photo</a></li>
+			<li><a href="/photos/admin/delete/[% photo.key %]">Delete photo</a></li>
+		</ul>
+	[% END %]
+[% END %]

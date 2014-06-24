@@ -1,0 +1,95 @@
+[% title = "Account Recovery" %]
+
+[% IF action == "fuser" %]
+	<h1>Username Recovery</h1>
+
+	The user database has been searched for that e-mail address. If it was found,
+	an e-mail has been sent to it listing the matched user names.<p>
+
+	Assuming everything went well, look in your e-mail inbox to see if the e-mail
+	has been received. If you didn't receive an e-mail, it might be possible that
+	no username on this site is associated with that address, and you should
+	<a href="/account/recover">try another one</a>.<p>
+
+	<strong>Note:</strong> for the safety of our users, this page will not confirm
+	or deny the existence of a valid e-mail address in our system.
+[% ELSIF action == "fpass" %]
+	<h1>Password Recovery</h1>
+
+	[% IF success %]
+		<strong>Success!</strong> The user name was found and we have sent password
+		recovery instructions to the e-mail address on file. Please check your
+		e-mail for further information.
+	[% ELSE %]
+		<strong>Failure!</strong> There is no valid e-mail address on file for that
+		account. If you are the owner of that account, please <a href="/help/comment">
+		contact the administrators</a> for assistance.
+	[% END %]
+[% ELSIF action == "reset" %]
+	<h1>Reset Password</h1>
+
+	[% IF success %]
+		<strong>Password reset successfully!</strong><p>
+
+		Your password has been updated. Please <a href="/account/login">log in</a> using
+		your new password.
+	[% ELSE %]
+		Please enter a new password for the account <strong>[% username %]</strong>.<p>
+
+		<form name="recover" action="/account/recover/[% username %]/[% hash %]" method="POST">
+			<strong>New password:</strong><br>
+			<input type="password" size="40" name="password" id="pw1" autocomplete="off"><p>
+
+			<strong>Confirm:</strong><br>
+			<input type="password" size="40" name="confirm" id="pw2" autocomplete="off"><p>
+
+			<input type="submit" value="Reset Password" onClick="return chkMatched()">
+		</form>
+
+		<script type="text/javascript">
+		function chkMatched() {
+			if ($("#pw1").val() != $("#pw2").val()) {
+				window.alert("Your passwords do not match!");
+				return false;
+			}
+			return true;
+		}
+		</script>
+	[% END %]
+[% ELSE %]
+	<h1>Account Recovery</h1>
+
+	Have you forgotten your username or password? You can try using the features
+	on this page to recover your account information. These features are only
+	useful if you have a valid e-mail address on file for your account. If you
+	need help, <a href="/help/comment">contact the administrators</a> about it.
+
+	<h2>Forgot your Username?</h2>
+
+	If you've forgotten your username, we can remind you of it if you provide the
+	e-mail address that was on the account.<p>
+
+	<strong>Note:</strong> for the safety of our users, we will <em>not</em> confirm
+	whether the e-mail address entered is actually associated with any users on this
+	site. If you're not sure of the e-mail address you used, you should try them all
+	until you get the confirmation e-mail.<p>
+
+	<form name="fuser" action="/account/recover" method="POST">
+		<input type="hidden" name="forgot" value="username">
+		<strong>Enter the e-mail address you used on your account:</strong><br>
+		<input type="text" size="40" name="email" autocomplete="off"><p>
+		<input type="submit" value="Recover Username">
+	</form>
+
+	<h2>Forgot your Password?</h2>
+
+	If you've forgotten your password, we can remind you of it if you provide the
+	username on the account.<p>
+
+	<form name="fpass" action="/account/recover" method="POST">
+		<input type="hidden" name="forgot" value="password">
+		<strong>Enter the user name for the account:</strong><br>
+		<input type="text" size="40" name="username" autocomplete="off"><p>
+		<input type="submit" value="Recover Password">
+	</form>
+[% END %]

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>[% title %]</title>
+        <link rel="stylesheet" type="text/css" href="/smoke/style.css">
+    </head>
+<body>
+
+<header>
+    <a href="/">
+        <img src="/smoke/firemarble.png" width="161" height="169" alt="Logo">
+    </a>
+    <span>PerlSiikir</span>
+</header>
+
+<nav>
+    <ul>
+        <li class="header">:: Navigation</li>
+		<li><a href="/">Home</a></li>
+		<li><a href="/guestbook">Guestbook</a></li>
+        <li><a href="https://github.com/kirsle/perlsiikir" target="_blank">View on Github</a></li>
+        <li><a href="https://github.com/kirsle/perlsiikir/archive/master.zip">Download</a></li>
+
+        <li class="header">:: Member Center</li>
+        [% IF login %]
+            <li>Hi, [% account.profile.displayname %]</li>
+            [% IF isAdmin %]
+                <li><a href="/admin">Admin Center</a></li>
+            [% END %]
+            <li><a href="/mail">Messages ([% unreadmsg %])</a></li>
+            <li><a href="/users/[% account.profile.username %]">My Profile</a> <small>[<a href="/profile/edit">edit</a>]</small></li>
+            <li><a href="/blog/[% account.profile.username %]">My Blog</a> <small>[<a href="/blog/update">update</a>]</small></li>
+            <li><a href="/photos/view/album/[% account.profile.username %]">My Photos</a></li>
+            <li><a href="/account/logout">Log Out</a></li>
+        [% ELSE %]
+            <li><a href="/account/login">Log In</a></li>
+            <li><a href="/account/register">Sign Up</a></li>
+        [% END %]
+
+        <li class="header">:: Stats</li>
+        <li>Total hits today: [% traffic.hits_today %]</li>
+        <li>Unique today: [% traffic.unique_today %]</li>
+        <li>Total hits: [% traffic.hits_total %]</li>
+        <li>Total Unique: [% traffic.unique_total %]</li>
+        <li><a href="/traffic/hits">Traffic History</a></li>
+        <li><a href="/traffic/referers">Referrers</a></li>
+    </ul>
+</nav>

@@ -1,0 +1,14 @@
+{
+   "1" : {
+      "fid" : "admin-blog",
+      "categories" : [
+         "General"
+      ],
+      "author" : "1",
+      "time" : 1403625872,
+      "id" : "1",
+      "privacy" : "public",
+      "sticky" : 0,
+      "subject" : "Admin Blog"
+   }
+}

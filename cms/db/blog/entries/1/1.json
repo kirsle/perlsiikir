@@ -1,0 +1,17 @@
+{
+   "comments" : 1,
+   "ip" : "69.31.114.66",
+   "fid" : "admin-blog",
+   "emoticons" : 1,
+   "author" : "1",
+   "categories" : [
+      "General"
+   ],
+   "time" : 1403625872,
+   "id" : "1",
+   "privacy" : "public",
+   "body" : "This is the admin user's web blog in the PerlSiikir CMS.<p>\r\n\r\nIf you can see this, it appears that you've configured the CMS properly and got it to run.<p>\r\n\r\nThe default site out-of-the-box comes with one user named \"admin\" with the password \"admin\". You should probably change this right away!",
+   "subject" : "Admin Blog",
+   "sticky" : 0,
+   "avatar" : "siikir-avatar.png"
+}

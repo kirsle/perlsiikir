@@ -1,0 +1,140 @@
+[% title = "Upload Photos" %]
+
+[%# Must be logged in %]
+[% IF login != 1 %]
+	[% INCLUDE "account/login.html" %]
+[% ELSE %]
+	[% IF success %]
+		<h1>Lookin' Good!</h1>
+
+		[% IF preview %]
+		<img src="[% photopub %]/[% preview %]"><p>
+		[% END %]
+
+		Your photo has been uploaded.
+
+		[% IF mobile %]
+			Unfortunately, you won't be able to select your preferred "thumbnail
+			view" for this image using your mobile device. Siikir has automatically
+			selected a thumbnail for you. You can change it at any time by going
+			to www.siikir.com on a computer or laptop.<p>
+
+			<a href="/photos/view/[% uid %]/[% pid %]">View this photo</a> or
+			<a href="/photos/upload">upload another</a>.
+		[% ELSE %]
+			Next, you should
+			<a href="/photos/admin/crop/[% pid %]">Select the thumbnail image</a> or
+			<a href="/photos/upload">upload another</a>.
+		[% END %]
+	[% ELSE %]
+		<h2>Upload a Picture</h2>
+
+		[% IF mobile %]
+		<strong>You are using a mobile device!</strong> Some mobile web browsers
+		don't work with regular file uploads to websites. If you can't select a
+		file to upload, you can try using the "Web" option and paste in a URL
+		to your photo online.<p>
+		[% END %]
+
+		You can upload a picture by pasting in a URL to your picture on another site,
+		or by uploading it from your computer.<p>
+
+		<strong class="bigger">Photo Rules</strong>
+
+		<ul>
+			<li><strong>Public Photos:</strong>
+			<ul>
+				<li>May not contain any nudity</li>
+				<li>May not depict illegal activity, drugs, etc.</li>
+				<li>May not promote hate or violence</li>
+			</ul></li>
+
+			<li><strong>Private &amp; Adult Photos</strong>
+			<ul>
+				<li>May contain nudity but all subjects in the photo must be 18 years or older</li>
+				<li>May not depict illegal activity, drugs, etc.</li>
+				<li>May not promote hate or violence</li>
+			</ul></li>
+		</ul><p>
+
+		Private &amp; Adult photos may <strong>not</strong> be set as your default
+		profile photo that will be visible in search results and hot lists, etc.<p>
+
+		<form name="upload" action="/photos/upload/go" method="POST" enctype="multipart/form-data">
+		<div>
+			[% IF mobile %]
+				<h2>Where is your photo?</h2>
+			[% ELSE %]
+			<fieldset>
+				<legend>Where is your picture located?</legend>
+			[% END %]
+
+				<label><input type="radio" name="location" value="pc" checked onChange="showBlock('#pic-filesystem')"> On my computer</label>
+				<label><input type="radio" name="location" value="www" onChange="showBlock('#pic-www')"> On the web</label><p>
+
+				<div id="pic-filesystem" style="display: block">
+					<strong class="bigger">Upload a picture from my computer</strong><br>
+					File path: <input type="file" size="30" name="photo">
+				</div>
+
+				<div id="pic-www" style="display: none">
+					<strong class="bigger">Upload a picture from the web</strong><br>
+					Enter the real URL to your picture on another website (hint: you can right click an image to copy its
+					location).<br>
+					<input type="text" size="40" name="url" value="http://">
+				</div>
+
+				<p>
+				Only jpeg, gif and png images are supported.<br>
+				Maximum file size: 6 MB
+			[% IF !mobile %]
+				</fieldset>
+			[% END %]<p>
+
+			[% IF mobile %]
+				<h2>Photo Options</h2>
+			[% ELSE %]
+				<fieldset>
+					<legend>Photo Options</legend>
+			[% END %]
+
+				Photo Album: <select name="album">
+				[% IF !albums %]
+					<option value="Photos">Photos</a>
+				[% END %]
+				[% FOREACH album = albums %]
+					<option value="[% album %]">[% album %]</a>
+				[% END %]
+				</select><br>
+				&nbsp;&nbsp;&nbsp;<strong>or</strong> create new album:
+				<input type="text" size="20" name="new-album"><br>
+				Caption: <input type="text" size="[% IF mobile %]20[% ELSE %]40[% END %]" name="caption"><br>
+				<label>
+					<input type="checkbox" name="private" value="true"> This is a private picture
+				</label>[% IF adultallowed %]<br>
+				<label>
+					<input type="checkbox" name="adult" value="true"> This is an adult picture (18+)
+				</label>[% END %]
+			[% IF !mobile %]
+			</fieldset>
+			[% END %]<p>
+
+			<input type="submit" value="Upload Picture">
+
+		</div>
+		</form>
+
+		<script>
+			var visBlock = "#pic-filesystem";
+			function showBlock(id) {
+				try {
+				if (visBlock != id) {
+					$(visBlock).css("display", "none");
+					visBlock = id;
+					$(visBlock).css("display", "block");
+				}
+				} catch(e) { alert(e.message) }
+			}
+		</script>
+	[% END %]
+[% END %]

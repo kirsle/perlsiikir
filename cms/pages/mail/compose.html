@@ -1,0 +1,54 @@
+[% title = "Send Message" %]
+
+[%# Must be logged in %]
+[% IF login != 1 %]
+	[% INCLUDE "account/login.html" %]
+[% ELSIF success %]
+	<h1>Message Sent!</h1>
+
+	Your message has been sent successfully.
+	<a href="/users/[% param.to %]">Back to profile.</a>
+[% ELSIF profile %]
+	<h1>Send Message</h1>
+
+	<form name="compose" action="/mail/compose/send" method="POST">
+	<input type="hidden" name="to" value="[% link %]">
+	<table width="100%" border="0" cellspacing="0" cellpadding="10">
+		<tr>
+			<td width="50" align="left" valign="top">
+				<strong>To:</strong>
+			</td>
+			<td align="left" valign="top">
+				[% IF photo.avatar %]
+					<img src="[% photopub %]/[% photo.avatar %]" alt="[% profile.displayname %]" class="portrait">
+				[% ELSE %]
+					<img src="/static/images/shy-avatar.png" alt="[% profile.displayname %]" class="portrait">
+				[% END %]
+				<br>
+				<a href="/users/[% profile.username %]"><strong>[% profile.displayname %]</strong></a>
+			</td>
+		</tr>
+		<tr>
+			<td align="left" valign="middle">
+				<strong>Subject:</strong>
+			</td>
+			<td align="left" valign="middle">
+				<input type="text" size="40" name="subject" class="fullWidth" value="[% param.subject %]">
+			</td>
+		</tr>
+		<tr>
+			<td align="left" valign="top">
+				<strong>Message:</strong>
+			</td>
+			<td align="left" valign="top">
+				<textarea cols="40" rows="10" name="message" class="fullWidth">[% param.message.replace("<br>","\n") %]</textarea>
+			</td>
+		</tr>
+	</table><p>
+
+	<div class="center">
+		<input type="submit" value="Send Message">
+	</div>
+
+	</form>
+[% END %]

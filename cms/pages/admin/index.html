@@ -1,0 +1,237 @@
+[% title = "Admin Center" %]
+
+[% IF action == "approval" %]
+	<h1>Reported Photos</h1>
+
+	There [% IF reports.size == 1 %]is[% ELSE %]are[% END %] [% reports.size %] photo[% "s" UNLESS reports.size == 1 %] pending approval.<p>
+
+	Next to each report are stats about the reporter's history of flagging photos. A <b>false</b> flag means
+	the user flagged a photo that wasn't in violation of the site's terms of service. A <b>true</b> flag means
+	a photo was indeed deleted by an admin as a result of the user flagging the photo. Weigh the true vs false
+	to determine punishment for a serial false flagger.<p>
+
+	[% IF reports.size > 0 %]
+		<table width="100%" border="0" cellspacing="4" cellpadding="0">
+			<tr>
+				<td width="200" align="left" valign="middle">
+					<strong class="bigger">Reported Photo</strong>
+				</td>
+				<td width="100" align="left" valign="middle">
+					<strong class="bigger">Reporter</strong>
+				</td>
+				<td align="left" valign="middle">
+					<strong class="bigger">Report Details</strong>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="3" align="left" valign="middle">
+					<hr>
+				</td>
+			</tr>
+			[% FOREACH report = reports %]
+			<tr>
+				<td align="center" valign="top">
+					<img src="/static/photos/[% report.meta.photo.tiny %]" alt="Thumbnail"><br>
+					Owner: <a href="/users/[% report.meta.victim.username %]">[% report.meta.victim.displayname %]</a>
+				</td>
+				<td align="left" valign="top">
+					[% IF report.meta.reporter.photo %]
+						<img src="/static/photos/[% report.meta.reporter.photo %]" alt="Reporter">
+					[% ELSE %]
+						<img src="/static/images/shy-avatar.png" alt="No Avatar">
+					[% END %]
+					<br>
+					<a href="/users/[% report.meta.reporter.username %]">[% report.meta.reporter.displayname %]</a>
+				</td>
+				<td align="left" valign="top">
+					<strong class="bigger">Reporter's Flagging History:</strong><br>
+					[% report.meta.reporter.stats.flags_given %] flag[% "s" UNLESS report.meta.reporter.stats.flags_given == 1 %] given<br>
+					[% report.meta.reporter.stats.flags_false %] <strong>false flag[% "s" UNLESS report.meta.reporter.stats.flags_false == 1 %]</strong><br>
+					[% report.meta.reporter.stats.flags_true %] true flag[% "s" UNLESS report.meta.reporter.stats.flags_true == 1 %]<p>
+
+					<strong class="bigger">Report Actions:</strong><br>
+					&#0164; <a href="/admin/approval?judgment=approve;uid=[% report.owner %];photo=[% report.photo %]">
+						<strong>APPROVE:</strong> This photo is NOT in violation of the terms of service</a><br>
+					&#0164; <a href="/admin/approval?judgment=deny;uid=[% report.owner %];photo=[% report.photo %]">
+						<strong>DENY:</strong> This photo is in violation of the terms of service</a>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="3" align="left" valign="middle">
+					<hr>
+				</td>
+			</tr>
+			[% END %]
+		</table>
+	[% END %]
+[% ELSIF action == "config" %]
+	[% IF sub == "edit" %]
+		<h1>Editing Plugin: [% plugin %]</h1>
+
+		<form name="editor" action="/admin/config/save" method="POST">
+			<input type="hidden" name="plugin" value="[% plugin %]">
+
+			[% INCLUDE "field-editor.html" %]
+
+			<input type="submit" value="Save Changes">
+		</form>
+	[% ELSIF sub == "save" %]
+		[% IF success %]
+			<h1>Settings Updated</h1>
+
+			The settings have been saved to disk. <a href="/admin/config">Back to plugin list</a>.
+		[% ELSE %]
+			<h1>Update Error</h1>
+
+			The plugin settings were not saved.
+		[% END %]
+	[% ELSE %]
+		<h1>Plugin Editor</h1>
+
+		Here you can modify the configuration for all the site plugins. Plugins
+		that have configurable options are shown as clickable links.<p>
+
+		<h2>[% plugins.size %] Plugins</h2>
+
+		<ul>
+		[% FOREACH plugin = plugins %]
+			<li>
+				[% IF plugin.1 %]
+					<a href="/admin/config/edit?plugin=[% plugin.0 %]">
+				[% END %]
+				[% plugin.0 %]
+				[% IF plugin.1 %]
+					</a>
+				[% END %]
+			</li>
+		[% END %]
+		</ul>
+	[% END %]
+[% ELSIF action == "users" %]
+	[% IF sub == "manage" %]
+		<h1>View &amp; Manage Users</h1>
+
+		There are [% users.size %] registered user(s).<p>
+
+		[% IF param.admins %]
+			<a href="/admin/users/manage">Show all users</a>
+		[% ELSE %]
+			<a href="/admin/users/manage?admins=1">Only show admin users</a>
+		[% END %]
+
+		<table width="100%" border="0" cellspacing="4" cellpadding="0">
+		[% i = 0 %]
+		[% FOREACH user = users %]
+			[% IF i == 0 %]
+				<tr>
+			[% END %]
+			<td width="25%" align="center" valign="top">
+				<a href="/users/[% user.profile.username %]">
+					[% IF user.photo.tiny %]
+					<img src="[% photopub %]/[% user.photo.tiny %]" alt="[% user.profile.username %]">
+					[% ELSE %]
+					<img src="/static/images/shy-tiny.png" alt="[% user.profile.username %]">
+					[% END %]
+				</a><br>
+				[% IF user.admin %]
+					<img src="/static/icons/admin.png" alt="Admin User" width="16" height="16">
+				[% END %]
+				<a href="/users/[% user.profile.username %]">[% user.profile.username %]</a> - ID:[% user.id %]<br>
+				[ <a href="/admin/users/become?id=[% user.id %]">Log in</a> |
+				<a href="/admin/users/passwd?id=[% user.id %]">Reset passwd</a><br>
+				<a href="/admin/users/delete?id=[% user.id %]">Delete</a> ]
+				<br><br><br>
+			</td>
+
+			[% i = i + 1 %]
+			[% IF i == 4 %]
+				</tr>
+				[% i = 0 %]
+			[% END %]
+		[% END %]
+		[% IF i < 4 %][%#>%]
+			[% WHILE i < 4 %][%#>%]
+				<td width="25%">&nbsp;</td>
+				[% i = i + 1 %]
+			[% END %]
+			</tr>
+		[% END %]
+		</table>
+	[% ELSIF sub == "passwd" %]
+		[% IF param.go == "yes" %]
+			<h1>Password Reset!</h1>
+
+			The password for <strong>[% user.username %]</strong>  has been reset to: <strong>[% param.password %]</strong>.
+		[% ELSE %]
+			<h1>Reset User Password</h1>
+
+			Resetting password for username: <strong>[% user.username %]</strong>.<p>
+
+			<form name="passwd" action="/admin/users/passwd" method="POST">
+			<input type="hidden" name="go" value="yes">
+			<input type="hidden" name="id" value="[% param.id %]">
+			<fieldset>
+				<legend>Password Reset</legend>
+
+				Enter a new password for this user. <strong>Note:</strong> this field is not
+				masked, so that you can copy the password you enter to the user.<p>
+
+				<input type="text" size="40" name="password"><p>
+
+				<input type="submit" value="Set Password">
+			</fieldset>
+			</form>
+		[% END %]
+	[% ELSIF sub == "become" %]
+		<h1>Changed Identity</h1>
+
+		You are now logged in as [% account.profile.displayname %] (username: [% account.username %]; ID: [% uid %]).
+	[% ELSIF sub == "delete" %]
+		[% IF success %]
+			<h1>User Deleted</h1>
+
+			The user <strong>[% user.username %]</strong> has been deleted.
+			<a href="/admin/users/manage">Back to User Management</a>.
+		[% ELSE %]
+			<h1>Delete User</h1>
+
+			You are about to delete <strong>[% user.username %]</strong>.<p>
+
+			<form name="cancel" action="/admin/users/delete" method="POST">
+			<input type="hidden" name="go" value="yes">
+			<input type="hidden" name="id" value="[% param.id %]">
+
+			To confirm deletion, please enter your <strong>administrator password</strong>
+			(the password you use to log in).<br>
+			<input type="password" size="40" name="password" autocomplete="off"><p>
+
+			<input type="submit" value="Delete This User">
+			</form>
+		[% END %]
+	[% END %]
+[% ELSE %]
+	<h1>Admin Center</h1>
+
+	<strong class="bigger">Common Administrator Tasks</strong>
+	<ul>
+		<li><a href="/admin/approval">View Pictures Needing Approval</a> [% IF notify.admin > 0 %](<strong>[% notify.admin %] Unapproved Picture[% "s" UNLESS notify.admin == 1 %]!</strong>)[% END %]</li>
+		<li><a href="/admin/incoming">View All Incoming Pictures</a></li>
+	</ul>
+
+	<strong class="bigger">Website Administration</strong>
+	<ul>
+		<li><a href="/admin/pages">Web Page Editor</a></li>
+		<li><a href="/admin/config">Plugin Configuration</a></li>
+	</ul>
+
+	<strong class="bigger">User Account Management</strong>
+	<ul>
+		<li><a href="/admin/users/manage">View &amp; Manage Users</a></li>
+		<li><a href="/account/register">Register New Users</a></li>
+	</ul>
+
+	<strong class="bigger">Maintenance Tasks</strong>
+	<ul>
+		<li><a href="/admin/maint/cache">Rebuild Search Cache</a></li>
+	</ul>
+[% END %]

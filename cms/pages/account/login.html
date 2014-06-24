@@ -1,0 +1,56 @@
+[% title = "Sign In" %]
+
+[% IF login %]
+	<h1>WB!</h1>
+
+	Welcome back!<p>
+
+	&#0164; <a href="/search">Search for nearby people</a><br>
+	&#0164; <a href="/users/[% account.profile.username %]">Go to my profile</a>
+[% ELSE %]
+	[% IF param.return %]
+		<h1>You must be logged in to do that!</h1>
+	[% ELSIF login_included != 1%]
+		<h1>Please Sign In</h1>
+	[% END %]
+
+	<form name="login" action="/account/login/go" method="POST">
+	[% IF !login_included && !mobile %]
+	<fieldset>
+		<legend>Log In</legend>
+	[% END %]
+
+		<strong class="bigger">[% sitename %] Log-in</strong><br>
+		Log in below with your <em>[% sitename %]</em> username<br>
+		and password.<p>
+
+		<strong>User name:</strong><br>
+		<input type="text" size="25" name="username"><p>
+
+		<strong>Password:</strong><br>
+		<input type="password" size="25" name="password"><p>
+
+		[% IF param.return %]
+		<input type="hidden" name="return" value="[% param.return | html %]">
+		[% END %]
+
+		<input type="submit" value="Sign In!">
+		<input type="button" value="New User? Sign Up" onClick="window.location='/account/register'">
+
+		[%# Facebook Connect %]
+		[% IF fb_configured %]
+			<p>
+			<strong class="bigger">Single Sign-On:</strong><br>
+			Or, sign on using a third-party account:<p>
+			<a href="[% fb_login_url %]" class="link-same-window">
+				<img src="/static/images/auth-facebook.png" width="105" height="27" alt="Connect with Facebook" title="Connect with Facebook">
+			</a>
+		[% END %]
+
+		<p>
+		<a href="/account/recover">Forgot username or password?</a>
+	[% IF login_included != 1 && !mobile %]
+	</fieldset>
+	[% END %]
+	</form>
+[% END %]

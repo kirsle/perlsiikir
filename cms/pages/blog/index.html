@@ -1,0 +1,193 @@
+[% IF display == "categories" %]
+	[%# Category display for the nav bar %]
+	[% SET smalls = 0 %]
+	[% FOREACH pair = order %]
+		[% IF pair.1 < 3 %][%#>%]
+			[% smalls = 1 %]
+			[% NEXT %]
+		[% END %]
+		&#0187; <a href="/blog/[% profile.username %]/category/[% pair.0 | uri %]">[% pair.0 %]</a> <small>([% pair.1 %])</small><br>
+	[% END %]
+	[% IF smalls %]
+		<div id="blog_show_more" style="display: none">
+			[% FOREACH pair = order %]
+				[% IF pair.1 < 3 %][%#>%]
+					&#0187; <a href="/blog/[% profile.username %]/category/[% pair.0 | uri %]">[% pair.0 %]</a> <small>([% pair.1 %])</small><br>
+				[% END %]
+			[% END %]
+		</div>
+		<div id="blog_show_less" style="display: block">
+			&#0164; <a href="#" onClick=" $('#blog_show_less').hide();  $('#blog_show_more').show(1000); return false">Show more...</a>
+		</div>
+	[% END %]
+[% ELSIF display == "entry" %]
+	[% title = post.subject %]
+
+	<h1>[% post.subject %]</h1>
+
+	<div class="blog-author">
+		<a href="/users/[% profile.username %]">
+		[% IF post.avatar %]
+			<div class="siikir-avatar"><img src="[% avatarpub %]/[% post.avatar %]" alt="[% profile.displayname | html %]"></div>
+		[% ELSIF photo.avatar %]
+			<div class="siikir-avatar"><img src="[% photopub %]/[% photo.avatar %]" alt="[% profile.displayname | html %]"></div>
+		[% END %]
+		</a>
+
+		<a href="/users/[% profile.username %]">
+			[% profile.username %]
+		</a>
+	</div>
+
+	<div class="blog-timestamp">
+		Posted by <a href="/users/[% profile.username %]">[% profile.displayname %]</a>
+		on [% post.pretty_time %]
+	</div>
+
+	[% post.body %]
+
+	<p>
+	<div class="clear">
+		<strong>Categories:</strong>
+		[% IF post.categories.size == 0 %]
+			<a href="/blog/[% profile.username %]/category/Uncategorized">Uncategorized</a>
+		[% ELSE %]
+			[% SET multiple = 0 %]
+			[% FOREACH tag = post.categories %]
+				[% IF multiple %],[% END %]
+				<a href="/blog/[% profile.username %]/category/[% tag | uri %]">[% tag %]</a>
+				[% multiple = 1 %]
+			[% END %]
+		[% END %]
+
+			<p>
+			[ <a href="/blog/[% profile.username %]">[% profile.displayname %]'s Blog</a>
+			[% IF login %]
+				[% IF account.username == profile.username %]
+					| <a href="/blog/update?id=[% post.id %]">Edit</a> |
+					<a href="/blog/update?id=[% post.id %]&delete=1">Delete</a>
+				[% END %]
+			[% END %]
+			]
+	</div>
+
+	[% IF post.comments %]
+		<a name="comments"></a>
+		<h2>Comments</h2>
+
+		<include>/comment?user=[% profile.userid %]&thread=blog-[% post.id %]&url=http://[% env.SERVER_NAME %]/blog/[% profile.username %]/[% post.fid %]&subject=[% post.subject %]</include>
+	[% END %]
+[% ELSE %]
+	[% title = profile.displayname _ "'s Web Blog" %]
+	[% IF category %]
+		<h1>Category: [% category %]</h1>
+	[% ELSIF !param.included %]
+		<h1>[% profile.displayname %]'s Web Blog</h1>
+	[% END %]
+
+	[%# Older/Newer links %]
+	[% IF can_older || can_earlier %]
+		<div class="right">
+		[
+			<a href="/rss.cgi">RSS Feed</a> |
+		[% IF can_earlier %]
+			<a href="/blog/[% profile.username %][% IF category %]/category/[% category | uri %][% END %][% IF earlier > 0 %]?skip=[% earlier %][% END %]">&lt; Newer</a>
+			[% IF can_older %] | [% END %]
+		[% END %]
+		[% IF can_older %]
+			<a href="/blog/[% profile.username %][% IF category %]/category/[% category | uri %][% END %]?skip=[% older %]">Older &gt;</a>
+		[% END %]
+		]
+		</div>
+	[% END %]
+
+	[% google = 0 %]
+	[% IF count == 0 %]
+		There are no blog posts yet.
+	[% ELSE %]
+		[% FOREACH post = posts %]
+			<a href="/blog/[% profile.username %]/[% post.fid %]" class="blog-title-index">
+				[% post.subject %]
+			</a><p>
+
+			<div class="blog-author">
+				<a href="/users/[% profile.username %]">
+				[% IF post.avatar %]
+					<img src="[% avatarpub %]/[% post.avatar %]" alt="[% profile.displayname | html %]">
+				[% ELSIF photo.avatar %]
+					<img src="[% photopub %]/[% photo.avatar %]" alt="[% profile.displayname | html %]">
+				[% END %]
+				</a><br>
+
+				<a href="/users/[% profile.username %]">
+					[% profile.username %]
+				</a>
+			</div>
+
+			<div class="blog-timestamp">
+				Posted by <a href="/users/[% profile.username %]">[% profile.displayname %]</a>
+				on [% post.pretty_time %]
+			</div>
+
+			[% post.body %]
+
+			<p>
+			<div class="clear">
+				<strong>Categories:</strong>
+				[% IF post.categories.size == 0 %]
+					<a href="/blog/[% profile.username %]/category/Uncategorized">Uncategorized</a>
+				[% ELSE %]
+					[% SET multiple = 0 %]
+					[% FOREACH tag = post.categories %]
+						[% IF multiple %],[% END %]
+						<a href="/blog/[% profile.username %]/category/[% tag | uri %]">[% tag %]</a>
+						[% multiple = 1 %]
+					[% END %]
+				[% END %]
+				<p>
+
+				<div class="g-plusone" data-annotation="inline" data-width="300" data-href="http://[% env.SERVER_NAME %]/blog/[% profile.username %]/[% post.fid %]"></div>
+
+				<p>
+				[
+				[% IF post.comments %]
+					<a href="/blog/[% profile.username %]/[% post.fid %]#comments">[% post.comment_count %] comment[% "s" UNLESS post.comment_count == 1 %]</a> |
+					<a href="/blog/[% profile.username %]/[% post.fid %]#addcomment">Add comment</a> |
+				[% END %]
+				<a href="/blog/[% profile.username %]/[% post.fid %]">Permalink</a>
+				[% IF login %]
+					[% IF account.username == profile.username %]
+						| <a href="/blog/update?id=[% post.id %]">Edit</a> |
+						<a href="/blog/update?id=[% post.id %]&delete=1">Delete</a>
+					[% END %]
+				[% END %]
+				]
+			</div>
+			<p>
+		[% END %]
+	[% END %]
+
+	[%# Older/Newer links %]
+	[% IF can_older || can_earlier %]
+		<div class="right">
+		[
+		[% IF can_earlier %]
+			<a href="/blog/[% profile.username %][% IF category %]/category/[% category | uri %][% END %][% IF earlier > 0 %]?skip=[% earlier %][% END %]">&lt; Newer</a>
+			[% IF can_older %] | [% END %]
+		[% END %]
+		[% IF can_older %]
+			<a href="/blog/[% profile.username %][% IF category %]/category/[% category | uri %][% END %]?skip=[% older %]">Older &gt;</a>
+		[% END %]
+		]
+		</div>
+	[% END %]
+
+	<p>
+	[% IF login %]
+		[% IF account.id == profile.userid %]
+			<h1>Administrative Options</h1>
+
+			&#0164; <a href="/blog/update">Post a Blog Entry</a>
+		[% END %]
+	[% END %]
+[% END %]

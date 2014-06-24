@@ -1,0 +1,312 @@
+[% title = "Photo Manager" %]
+
+[% IF login != 1 %]
+	[% INCLUDE "account/login.html" %]
+[% ELSIF action == "setdefault" %]
+	<h1>Profile Picture</h1>
+
+	<img src="[% photopub %]/[% photo.small %]" alt="Profile Picture" class="portrait"><p>
+
+	Your profile picture has been set. <a href="/photos/view/[% uid %]/[% photo.key %]">Back to photo view.</a>
+[% ELSIF action == "setcover" %]
+	<h1>Album Cover</h1>
+
+	<img src="[% photopub %]/[% photo.small %]" alt="Album Cover" class="portrait"><p>
+
+	The album cover has been updated. <a href="/photos/view/[% uid %]/[% photo.key %]">Back to photo view.</a>
+[% ELSIF action == "crop" %]
+	[% IF param.action == "doCrop" %]
+		<h1>Photo Cropped!</h1>
+
+		Your photo has been cropped.<p>
+
+		<img src="[% photopub %]/[% photo.small %]" alt="New Photo" class="portrait"><p>
+
+		<a href="/photos/view/[% uid %]/[% photo.key %]">Back to photo view</a>, or
+		<a href="/photos/upload">upload another</a>.
+	[% ELSE %]
+		<h1>Crop Photo</h1>
+
+		All versions of your photo except the largest one are cropped into a square shape.
+		You can use this page to modify the region of the photo you want to crop.<p>
+
+		<table border="0" cellspacing="4" cellpadding="2">
+			<tr>
+				<td align="center" valign="middle">
+					<img src="[% photopub %]/[% photo.large %]" id="cropbox">
+				</td>
+				<td align="center" valign="middle">
+					<strong>Preview:</strong><br>
+					<div style="width: 100px; height: 100px; overflow: hidden" class="portrait">
+						<img src="[% photopub %]/[% photo.large %]" id="preview">
+					</div>
+				</td>
+			</tr>
+		</table><p>
+
+		<form name="crop" action="/photos/admin/crop/[% photo.key %]" method="POST">
+			<input type="hidden" name="action" value="doCrop">
+			<input type="hidden" name="x" id="x" value="0">
+			<input type="hidden" name="y" id="y" value="0">
+			<input type="hidden" name="size" id="size" value="100">
+
+			<input type="submit" value="Crop Photo!">
+		</form>
+
+		<script type="text/javascript">
+			$(window).load(function() {
+				$("#cropbox").Jcrop({
+					onChange: showPreview,
+					onSelect: showPreview,
+					aspectRatio: 1,
+					setSelect: [ 0, 0, $("#cropbox").width(), $("#cropbox").width() ]
+				});
+			});
+
+			function showPreview (coords) {
+				if (parseInt(coords.w) > 0) {
+					var rx = 100 / coords.w;
+					var ry = 100 / coords.h;
+					var ht = $("#cropbox").height();
+					var wt = $("#cropbox").width();
+
+					// Update the preview.
+					$("#preview").css({
+						width: Math.round(rx * wt) + "px",
+						height: Math.round(ry * ht) + "px",
+						marginLeft: '-' + Math.round(rx * coords.x) + 'px',
+						marginTop: '-' + Math.round(ry * coords.y) + 'px'
+					});
+
+					// Update the form.
+					$("#x").val(coords.x);
+					$("#y").val(coords.y);
+					$("#size").val(coords.w);
+				}
+			}
+		</script>
+	[% END %]
+[% ELSIF action == "edit" %]
+	<h1>[% IF success %]Photo Updated![% ELSE %]Edit Photo[% END %]</h1>
+
+	<img src="[% photopub %]/[% photo.small %]" alt="Photo" class="portrait"><p>
+
+	[% IF success %]
+		Your photo has been successfully updated. <a href="/photos/view/[% uid %]/[% photo.key %]">Back to photo view.</a>
+	[% ELSE %]
+		<form name="edit" action="/photos/admin/edit/[% photo.key %]/save" method="POST">
+		<fieldset>
+			<legend>Photo Details</legend>
+
+			<input type="hidden" name="hash" value="[% hash %]">
+			Photo caption: <input type="text" size="30" name="caption" value="[% photo.caption %]"><br>
+			<label>
+				<input type="checkbox" name="private" value="true"[% " checked" IF photo.private %]> This is a private picture
+			</label>[% IF adultallowed %]<br>
+			<label>
+				<input type="checkbox" name="adult" value="true"[% " checked" IF photo.adult %]> This is an adult photo (18+)
+			</label>
+			[% END %]
+		</fieldset><p>
+
+		<input type="submit" value="Save Changes">
+		</form>
+	[% END %]
+[% ELSIF action == "arrange" %]
+	<h1>Arrange: [% album %]</h1>
+
+	[% IF success %]
+		Your photos have been arranged!<p>
+
+		<a href="/photos/view/album/[% account.username %]/[% album %]">Return to the album.</a>
+	[% ELSE %]
+		Drag and drop your photos in the positions you want them in.<p>
+
+		<form name="arrange" action="/photos/admin/arrange/[% album %]" method="POST" onSubmit="return doArrangePhotos()">
+			<input type="hidden" name="do" value="arrange">
+			<input type="hidden" name="order" id="order" value="">
+			<input type="submit" value="Save Changes">
+			<input type="button" value="Cancel" onClick="history.go(-1)">
+		</form>
+
+		<ul id="arrange-photos">
+		[% FOREACH photo = photos %]
+			<li id="key-[% photo.key %]"><img src="[% photopub %]/[% photo.tiny %]" alt="*" class="portrait"></li>
+		[% END %]
+		</ul>
+
+		<div style="clear: both"></div>
+
+		<script type="text/javascript">
+			$(document).ready(function() {
+				$("#arrange-photos").sortable();
+				$("#arrange-photos").disableSelection();
+			});
+
+			function doArrangePhotos () {
+				var order = [];
+
+				// Get the list of elements.
+				var list = $("#arrange-photos").children().each(function() {
+					var img = $(this).attr("id").replace(/^key-/, "");
+					order.push(img);
+				});
+
+				// Update the form and submit.
+				$("#order").val(order.join(";"));
+				return true;
+			}
+		</script>
+	[% END %]
+[% ELSIF action == "delete" %]
+	<h1>Delete Photo</h1>
+
+	[% IF success %]
+		The photo has been deleted. <a href="/photos/view/album/[% uid %]">Return to Photo Manager.</a>
+	[% ELSE %]
+		<img src="[% photopub %]/[% photo.small %]" alt="Photo" class="portrait"><p>
+
+		<strong>Are you sure you want to delete this photo?</strong><p>
+
+		Deleting a photo is not reversible, and the files are physically removed from the web server and won't be
+		recoverable. Are you <strong>sure</strong> you want to continue?<p>
+
+		<form name="delete" action="/photos/admin/delete/[% photo.key %]/confirm" method="POST">
+		<fieldset>
+			<legend>Confirm Deletion</legend>
+
+			<input type="hidden" name="hash" value="[% hash %]">
+			<input type="submit" value="Yes, Delete This Photo">
+			<input type="button" value="No, Do Not Delete" onClick="history.go(-1)">
+		</fieldset>
+		</form>
+	[% END %]
+[% ELSIF action == "private" %]
+	[% IF param.do == "unlock" %]
+		<h1>Unlock Private Photos</h1>
+
+		Your private photos have been unlocked for <a href="/users/[% profile.username %]">[% profile.displayname %]</a>.
+		They have been notified of this.<p>
+
+		<strong>Please note:</strong> you may re-lock your photos from this person at any time,
+		and they will <strong>NOT</strong> be notified that you have locked your photos.<p>
+
+		<a href="/photos/admin/private?do=list">Manage who can see your private photos.</a>
+	[% ELSIF param.do == "lock" %]
+		<h1>Lock Private Photos</h1>
+
+		Your private photos have been locked. <a href="/users/[% profile.username %]">[% profile.displayname %]</a> can
+		no longer see your private photos. They have <strong>not</strong> been notified of this.<p>
+
+		<a href="/photos/admin/private?do=list">Manage who can see your private photos.</a>
+	[% ELSIF param.do == "list" %]
+		<h1>Who Can See My Private Photos?</h1>
+
+		You can allow users on Siikir to view all of your private photos by clicking on the
+		"Unlock my private photos" link on their profile page. See <a href="/help">Private Photos TODO</a>
+		for more information.<p>
+
+		This page lists all of the users you have unlocked your private photos for.<p>
+
+		<strong class="bigger">You have unlocked your photos for [% viewers.size %] user[% "s" UNLESS viewers.size == 1 %].</strong><p>
+
+		<table border="0" cellspacing="4" cellpadding="0" width="100%">
+		[% i = 0 %]
+		[% FOREACH item = viewers %]
+			[% IF i == 0 %]
+			<tr>
+			[% END %]
+				<td width="25%" align="center" valign="top">
+					<a href="/users/[% item.username %]">
+					[% IF item.photo %]
+						<img src="[% photopub %]/[% item.photo %]" alt="[% item.displayname %]">
+					[% ELSE %]
+						<img src="/static/images/shy-tiny.png" alt="[% item.displayname %]">
+					[% END %]</a><br>
+					<a href="/users/[% item.username %]">[% item.displayname %]</a><br>
+					<img src="/static/icons/unlocked.png" width="16" height="16" alt="Unlocked" title="Unlocked">
+					<a href="/photos/admin/private?do=lock&for=[% item.username %]">Lock my photos</a>
+				</td>
+
+			[% i = i + 1 %]
+			[% IF i == 4 %]
+				</tr>
+				[% i = 0 %]
+			[% END %]
+		[% END %]
+		[% IF i < 4 %][%#>%]
+			[% WHILE i < 4 %][%#>%]
+				<td width="25%" align="center" valign="top">&nbsp;</td>
+				[% i = i + 1 %]
+			[% END %]
+			</tr>
+		[% END %]
+		</table>
+
+	[% END %]
+[% ELSIF action == "share" %]
+	[% title = "Share Photos" %]
+	[% IF param.do == "private" %]
+		<h1>Share Private Photos</h1>
+
+		The following link may be used by anybody outside of [% sitename %] to
+		view your photo albums with private photos unlocked.<p>
+
+		The link will expire <strong>[% param.lifetime %]</strong> seconds after
+		it was created.<p>
+
+		<input type="text" size="50" value="http://[% env.SERVER_NAME %]/photos/view/album/[% volatile %]"
+		onClick="this.select()" readonly><p>
+
+		&#0164; <a href="/photos/admin/share">Back to Photo Sharing</a>
+	[% ELSE %]
+		<h1>Share Photos Outside of [% sitename %]</h1>
+
+		You can use this page to get links to share your photo albums (and,
+		optionally, private photos) with users who do not have [% sitename %]
+		accounts.<p>
+
+		<h2>Public Photos</h2>
+
+		[% IF account.profile.privacy.match("unlinkable") %]
+			You have currently set your profile to be <strong>Unlinkable</strong>
+			so that no public link to your profile will work for anybody for an
+			extended period of time.<p>
+
+			Because of this, you can't get a link to your public photo album.
+			You will need to <a href="/profile/edit">edit your profile</a> and
+			disable the Unlinkable option to share your photo albums.
+		[% ELSE %]
+			You can copy and paste this URL to share your public photo albums with
+			anybody on the Internet:<p>
+
+			<input type="text" size="50" value="http://[% env.SERVER_NAME %]/photos/view/album/[% account.username %]"
+			onClick="this.select()" readonly>
+		[% END %]
+
+		<h2>Private Photos</h2>
+
+		You can share your private photos with users who do not have
+		[% sitename %] accounts on a temporary basis. Using the form below you
+		can select how long the access is allowed for and then generate a
+		temporary link that can be used to view your private photos.<p>
+
+		The generated link will expire after it's created so it won't last
+		forever. You can specify how long the link should be good for.<p>
+
+		<form name="privacy" action="/photos/admin/share" method="POST">
+			<input type="hidden" name="do" value="private">
+
+			<strong>How long do you want to allow access?</strong><br>
+			<select name="lifetime">
+				<option value="15">15 minutes</option>
+				<option value="30" selected>30 minutes</option>
+				<option value="60">60 minutes</option>
+				<option value="120">2 hours</option>
+				<option value="300">5 hours</option>
+			</select><p>
+
+			<input type="submit" value="Create Temporary Link">
+		</form>
+	[% END %]
+[% END %]

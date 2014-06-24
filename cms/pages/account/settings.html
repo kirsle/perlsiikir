@@ -1,0 +1,162 @@
+[% title = "Account Settings" %]
+
+[%# Must be logged in %]
+[% IF login != 1 %]
+	[% INCLUDE "account/login.html" %]
+[% ELSIF action == "username" %]
+	[% IF success %]
+		<h1>Username Changed!</h1>
+
+		Your user name is now <strong>[% param.username %]</strong>. Please be sure to log in
+		using this name from now on.<p>
+
+		<a href="/account/settings">Back to Account Settings</a>.
+	[% ELSE %]
+		<h1>Change my User Name</h1>
+
+		If you wish to change your user name, you can do so on this page.<p>
+
+		Note that changing your user name will break the permanent link to your profile
+		page (e.g. <a href="/users/[% profile.username %]">www.siikir.com/users/[% profile.username %]</a>),
+		and you'll need to start logging in with your new user name from then on.
+		It will <strong>not</strong> disrupt your hot list, "who thinks I'm hot"
+		list, or messages sent or received.<p>
+
+		Changing your user name will free up your current user name to be registered
+		by another user later.<p>
+
+		<form name="change" action="/account/settings/username/go" method="POST">
+		<fieldset>
+			<legend>Change My Username</legend>
+
+			For verification you'll need to provide your password to change your username.<p>
+
+			<strong>Current Password:</strong><br>
+			<input type="password" size="30" name="password"><p>
+
+			<strong>Desired Username:</strong><br>
+			<input type="text" size="30" name="username" value="[% param.username %]"><p>
+
+			<input type="submit" value="Change My Username">
+		</fieldset>
+		</form>
+	[% END %]
+[% ELSIF action == "password" %]
+	[% IF success %]
+		<h1>Password Changed!</h1>
+
+		Your password has been changed. Please be sure to log in using this password from now on.<p>
+
+		<a href="/account/settings">Back to Account Settings</a>.
+	[% ELSE %]
+		<h1>Change my Password</h1>
+
+		<form name="change" action="/account/settings/password/go" method="POST">
+		<fieldset>
+			<legend>Change my Password</legend>
+
+			<strong>Current Password:</strong><br>
+			For verification purposes.<br>
+			<input type="password" size="30" name="current"><p>
+
+			<strong>New Password:</strong><br>
+			<input type="password" size="30" name="new"><p>
+
+			<strong>Confirm New Password:</strong><br>
+			<input type="password" size="30" name="confirm"><p>
+
+			<input type="submit" value="Change My Password">
+		</fieldset>
+		</form>
+	[% END %]
+[% ELSIF action == "cancel" %]
+	[% IF success %]
+		<h1>Goodbye!</h1>
+
+		Your account has been deleted, along with any photos, messages, profile
+		data and other information Siikir had associated with your account.<p>
+
+		You have now been logged out of Siikir. We'll miss you!
+	[% ELSE %]
+		<h1>Cancel My Account</h1>
+
+		This feature is still waiting to be implemented. Sorry! It'll be here soon.
+	[% END %]
+[% ELSIF action == "block" %]
+	[% IF param.unblock %]
+		[% title = "User Unblocked!" %]
+		<h1>User Unblocked!</h1>
+
+		This user has been removed from your blocked list.
+	[% ELSE %]
+		[% title = "User Blocked!" %]
+		<h1>User Blocked!</h1>
+
+		The user has been blocked. You will no longer see them and they will no longer
+		see you on this site.
+	[% END %]
+
+	<a href="/account/settings/blocked">View who you have blocked.</a>
+[% ELSIF action == "blocked" %]
+	[% title = "My Block List" %]
+	<h1>My Block List</h1>
+
+	You have blocked the following [% account.blocked.size %] user[% "s" UNLESS account.blocked.size == 1 %] from contacting you.<p>
+
+	[% IF account.blocked.size > 0 %]
+	<table width="100%" border="0" cellspacing="4" cellpadding="0">
+	[% i = 0 %]
+	[% FOREACH user = account.blocked %]
+		[% IF i == 0 %]
+			<tr>
+		[% END %]
+		<td width="25%" align="center" valign="top">
+			[% IF cache.$user.photo.tiny %]
+				<img src="[% photopub %]/[% cache.$user.photo.tiny %]" alt="Profile Photo" class="portrait">
+			[% ELSE %]
+				<img src="/static/images/shy-tiny.png" alt="No Photo" class="portrait">
+			[% END %]<br>
+			<strong>[% cache.$user.displayname %]</strong><br>
+			[<a href="/account/settings/block?who=[% cache.$user.username %];unblock=1">Unblock</a>]
+		</td>
+		[% i = i + 1 %]
+		[% IF i == 4 %]
+			</tr>
+			[% i = 0 %]
+		[% END %]
+	[% END %]
+	[% IF i < 4 %][%#>%]
+		[% WHILE i < 4 %][%#>%]
+			<td width="25%">&nbsp;</td>
+			[% i = i + 1 %]
+		[% END %]
+		</tr>
+	[% END %]
+	</table>
+	[% END %]
+[% ELSE %]
+	<h1>Account Settings</h1>
+
+	You can use this page to view and modify your account settings.<p>
+
+	<strong class="bigger">View &amp; Manage Profile</strong>
+
+	<ul>
+		<li><a href="/profile/edit">Edit My Profile</a> (<a href="/users/[% profile.username %]">View my Profile</a>)</li>
+		<li><a href="/photos/view/album/[% profile.username %]">View &amp; Manage Photos</a></li>
+	</ul>
+
+	<strong class="bigger">Blocked Users</strong>
+
+	<ul>
+		<li><a href="/account/settings/blocked">View users who I've blocked</a></li>
+	</ul>
+
+	<strong class="bigger">Manage Account</strong>
+
+	<ul>
+		<li><a href="/account/settings/username">Change my User Name</a></li>
+		<li><a href="/account/settings/password">Change my Password</a></li>
+		<li><a href="/account/settings/cancel">Cancel my Account</a></li>
+	</ul>
+[% END %]

@@ -1,0 +1,75 @@
+[% title = "Hot List" %]
+
+[% IF action == "add" %]
+	<h1>Add to Hot List</h1>
+
+	[% IF success %]
+		<a href="/users/[% link %]">[% profile.displayname %]</a> was added to your hot list.
+	[% END %]
+[% ELSIF action == "remove" %]
+	<h1>Remove from Hot List</h1>
+
+	[% IF success %]
+		<a href="/users/[% link %]">[% profile.displayname %]</a> was removed from your hot list.
+	[% END %]
+[% ELSE %]
+	<h1>[% IF action == "reverse" %]Who Thinks I'm Hot?[% ELSE %]My Hot List[% END %]</h1>
+
+	[% IF action == "reverse" %]
+		[% hotlist.size %] [% IF hotlist.size == 1 %]person[% ELSE %]people[% END %] think you're hot!<p>
+
+		&lt; <a href="/hotlist">Who do I think is hot?</a>
+	[% ELSE %]
+		[% IF hotlist.size == 0 %]
+			You haven't added anybody to your hot list yet. <a href="/search">Search for new people!</a>
+		[% ELSE %]
+			You have added [% hotlist.size %] [% IF hotlist.size == 1 %]person[% ELSE %]people[% END %] to your hot list.
+		[% END %]<p>
+
+		&gt; <a href="/hotlist/reverse">[% reverse %] [% IF reverse == 1 %]person[% ELSE %]people[% END %] think[% "s" IF reverse == 1 %] you're hot!</a>
+	[% END %]
+	<p>
+
+	[% IF hotlist.size > 0 %]
+		<table width="100%" border="0" cellspacing="4" cellpadding="0">
+		[% i = 0 %]
+		[% FOREACH user = hotlist %]
+			[% IF i == 0 %]
+			<tr>
+			[% END %]
+
+				<td width="25%" align="center" valign="top">
+					<a href="/users/[% user.link %]">
+					[% IF user.photo.flagged && !user.photo.approved %]
+						<img src="/static/images/pending-tiny.png" alt="[% user.displayname %]" class="portrait">
+					[% ELSIF user.photo.tiny %]
+						<img src="[% photopub %]/[% user.photo.tiny %]" alt="[% user.displayname %]" class="portrait">
+					[% ELSE %]
+						<img src="/static/images/shy-tiny.png" alt="[% user.displayname %]" class="portrait">
+					[% END %]
+					</a><br>
+					<strong><a href="/users/[% user.link %]">[% user.displayname %]</a></strong><br>
+					[% user.age %]
+					[% IF user.gender %]
+						/ [% user.gender %]
+					[% END %]
+				</td>
+
+			[% i = i + 1 %]
+			[% IF i == 4 %]
+				</tr>
+				[% i = 0 %]
+			[% END %]
+		[% END %]
+		[% IF i < 4 %][%#>%]
+			[% WHILE i < 4 %][%#>%]
+				<td width="25%" align="center" valign="top">
+					&nbsp;
+				</td>
+				[% i = i + 1 %]
+			[% END %]
+			</tr>
+		[% END %]
+		</table>
+	[% END %]
+[% END %]

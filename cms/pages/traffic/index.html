@@ -1,0 +1,109 @@
+[% title = "Traffic Statistics" %]
+[% USE Math %]
+
+[% IF action == "hits" %]
+	<h1>Visitor History</h1>
+
+	Unique visitors and hit counts have been logged since [% history.oldest %].<p>
+
+	The most unique visitors on this site in one day has been [% history.most_unique.1 %] on
+	[% history.most_unique.0 %]. The most hits total in one day has been [% history.most_hits.1 %]
+	on [% history.most_hits.0 %].<p>
+
+	Here is the full list of hits over time. Percentages are relative to the current records.<p>
+
+	<table width="100%" border="0" cellspacing="2" cellpadding="2">
+		<tr>
+			<th width="20">Date</th>
+			<th>Graph</th>
+			<th width="250">Details</th>
+		</tr>
+		[% FOREACH date = history.traffic %]
+			[% pct_1 = 100 %]
+			[% pct_2 = 100 %]
+			[% IF history.most_unique.1 > 0 %]
+				[% pct_1 = Math.int((date.unique / history.most_unique.1) * 100) %]
+			[% END %]
+			[% IF history.most_hits.1 > 0 %]
+				[% pct_2 = Math.int((date.hits / history.most_hits.1) * 100) %]
+			[% END %]
+		<tr>
+			<td align="center" valign="middle" rowspan="2">
+				[% date.date %]
+			</td>
+			<td align="left" valign="middle">
+				<div style="height: 16px; width: [% pct_1 %]%; background-image: url('/static/images/blue-clearlooks.png'); border: 1px outset #0099FF"></div>
+			</td>
+			<td align="left" valign="middle">
+				Unique: [% date.unique %] ([% pct_1 %]%)
+			</td>
+		</tr>
+		<tr>
+			<td align="left" valign="middle">
+				<div style="height: 16px; width: [% pct_2 %]%; background-image: url('/static/images/pink-clearlooks.png'); border: 1px outset #FF99FF"></div>
+			</td>
+			<td align="left" valign="middle">
+				Hits: [% date.hits %] ([% pct_2 %]%)
+			</td>
+		</tr>
+		[% END %]
+	</table>
+[% ELSIF action == "referers" %]
+	<h1>HTTP Referrers</h1>
+
+	This table lists the HTTP referrers to this site, in order of popularity. For the most recent 25
+	links, see <a href="#recent">the end of this page</a>.<p>
+
+	<h2>Google Queries</h2>
+	<div style="height: 450px; overflow: auto">
+	<table width="100%">
+		<tr>
+			<th width="40">Hits</td>
+			<th>Query</th>
+		</tr>
+		[% FOREACH link = google %]
+		<tr>
+			<td align="center" valign="top">
+				[% link.1 %]
+			</td>
+			<td align="left" valign="top">
+				[% link.0 %]
+			</td>
+		</tr>
+		[% END %]
+	</table>
+	</div>
+
+	<h2>Other Referrers</h2>
+	<div style="height: 450px; overflow: auto">
+	<table width="100%">
+		<tr>
+			<th width="40">Links</th>
+			<th>URL</th>
+		</tr>
+		[% FOREACH link = referers.referers %]
+			[% NEXT UNLESS link %]
+		<tr>
+			<td align="center" valign="top">
+				[% link.1 %]
+			</td>
+			<td align="left" valign="top">
+				[% link.0.replace("(.{20})", '$1<wbr>') %]
+			</td>
+		</tr>
+		[% END %]
+	</table>
+	</div><p>
+
+	<a name="recent"></a>
+
+	<h2>25 Most Recent Links</h2>
+
+	<ol>
+	[% FOREACH item = referers.recent %]
+		<li>[% item | html %]</li>
+	[% END %]
+	</ol>
+[% ELSE %]
+	...
+[% END %]
